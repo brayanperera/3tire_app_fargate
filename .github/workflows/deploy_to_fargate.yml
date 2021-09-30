@@ -16,11 +16,11 @@ jobs:
         include:
           - module: api
             MODULE_DIR: api
-            IMAGE_NAME: toptal_api
+            IMAGE_NAME: toptal-api
             SERVICE_NAME: toptal_api
           - module: web
             MODULE_DIR: web
-            IMAGE_NAME: toptal_web
+            IMAGE_NAME: toptal-web
             SERVICE_NAME: toptal_web
     steps:
       - name: Check out the repo

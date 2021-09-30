@@ -23,8 +23,17 @@ variable "vpc" {
 variable "apps" {
   type = list(object({
     app_name = string
-    port = number
-    lb_port = number
+    port_mapping = list(object({
+      containerPort = number
+      hostPort = number
+      protocol = string
+    }))
+    lb_http_port_map = map(object({
+      default_http = object({
+        listener_port =  number
+        target_group_port = number
+      })
+    }))
     env_vars = list(object({
       name = string
       value = string
@@ -37,17 +46,11 @@ variable "apps" {
       unhealthy_threshold = number
     })
     module_dir = string
+    working_directory = string
     service_config = object({
       cpu = number
       memory = number
       count = number
     })
-    sec_group_rules = list(object({
-      from_port   = number
-      to_port     = number
-      protocol    = string
-      cidr_block  = string
-      description = string
-    }))
   }))
 }

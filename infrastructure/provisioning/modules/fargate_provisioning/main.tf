@@ -1,59 +1,44 @@
-/*==== Fargate: IAM config  ======*/
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "ecsTaskExecutionRole"
-  assume_role_policy = jsonencode({
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "1_assume_policy",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "ecs-tasks.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-})
-}
+resource "aws_security_group" "app_sg" {
+  count = length(var.apps)
+  name        = var.apps[count.index].app_name
+  description = "Security group to allow inbound to ${var.apps[count.index].app_name} LB"
+  vpc_id      = var.vpc_id
 
-resource "aws_iam_role_policy_attachment" "ecsTaskExecutionRole-attach" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
+  tags = {
+    Environment = var.common_config.environment
+  }
 
-resource "aws_iam_group" "fargate_execution" {
-  name = var.fargate.iam_group
-  path = "/users/"
-}
-
-resource "aws_iam_group_policy_attachment" "fargate_execution-ecs-attach" {
-  group      = aws_iam_group.fargate_execution.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
-}
-
-resource "aws_iam_group_policy_attachment" "fargate_execution_policy_attach" {
-  count = length(var.fargate.group_policies)
-  group      = aws_iam_group.fargate_execution.name
-  policy_arn = "arn:aws:iam::aws:policy/${var.fargate.group_policies[count.index]}"
-}
-
-/*==== Fargate: ECS Cluster  ======*/
-
-module "ecs-cluster" {
-  source  = "cn-terraform/ecs-cluster/aws"
-  version = "1.0.7"
-  name = var.fargate.ecs_cluster
+  ingress = var.apps[count.index].sec_group_rules
 }
 
 module "ecs-fargate" {
   count = length(var.apps)
   source  = "cn-terraform/ecs-fargate/aws"
   version = "2.0.26"
-  # insert the 25 required variables here
+
   container_image = "${var.common_config.aws_account_id}.dkr.ecr.${var.common_config.region}.amazonaws.com/${var.apps[count.index].app_name}:latest"
   container_name = var.apps[count.index].app_name
-  name_prefix = ""
-  private_subnets_ids = []
-  public_subnets_ids = []
-  vpc_id = ""
+  name_prefix = var.fargate.ecs_cluster
+  private_subnets_ids = var.private_subnets_ids
+  public_subnets_ids = var.public_subnets_ids
+  vpc_id = var.vpc_id
+  firelens_configuration = var.fargate.firelens_configuration
+  log_configuration = var.fargate.log_configuration
+  privileged = var.fargate.privileged
+  start_timeout = var.fargate.start_timeout
+  stop_timeout = var.fargate.stop_timeout
+  working_directory = var.apps[count.index].working_directory
+  container_cpu = var.apps[count.index].service_config.cpu
+  container_memory = var.apps[count.index].service_config.memory
+  desired_count = var.apps[count.index].service_config.count
+  environment  = var.apps[count.index].env_vars
+  lb_security_groups = concat(aws_security_group.app_sg[*].id, [var.default_security_group])
+  lb_target_group_health_check_healthy_threshold  = var.apps[count.index].health_check.healthy_threshold
+  lb_target_group_health_check_unhealthy_threshold = var.apps[count.index].health_check.unhealthy_threshold
+  lb_target_group_health_check_interval = var.apps[count.index].health_check.interval
+  lb_target_group_health_check_path  = var.apps[count.index].health_check.path
+  lb_target_group_health_check_timeout  = var.apps[count.index].health_check.timeout
+  port_mappings = var.apps[count.index].port_mapping
+  lb_http_ports = var.apps[count.index].lb_http_port_map
+  lb_https_ports = null
 }

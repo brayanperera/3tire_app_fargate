@@ -29,6 +29,17 @@ module "db_provisioning" {
   rds = var.rds
 }
 
+module "fargate_provisioning" {
+  source = "./modules/fargate_provisioning"
+  vpc_id = module.vpc_provisioning.vpc_id
+  public_subnets_ids = module.vpc_provisioning.vpc_public_subnet_ids
+  private_subnets_ids = module.vpc_provisioning.vpc_private_subnet_ids
+  default_security_group = module.vpc_provisioning.default_sec_group_id
+  common_config = var.common_config
+  fargate = var.fargate
+  apps = var.apps
+}
+
 #
 #module "lb_provisioning" {
 #  source = "./modules/lb_provisioning"

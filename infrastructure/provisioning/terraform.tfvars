@@ -28,9 +28,20 @@ rds = {
 
 apps = [
   {
-    app_name = "toptal_api"
-    port = 5001
-    lb_port = 80
+    app_name = "toptal-api"
+    port_mapping = [
+      {
+        containerPort = 5001
+        hostPort = 5001
+        protocol = "tcp"
+      }
+    ]
+    lb_http_port_map = {
+      default_http = {
+        listener_port = 80
+        target_group_port = 5001
+      }
+    }
     env_vars = [
       {
         name = "PORT"
@@ -65,6 +76,7 @@ apps = [
       unhealthy_threshold = 2
     }
     module_dir = "./api"
+    working_directory = "/usr/src/app"
     service_config = {
       cpu = 256
       memory = 1024
@@ -75,15 +87,30 @@ apps = [
         from_port = 80
         to_port = 80
         protocol = "tcp"
-        cidr_block = "0.0.0./0"
+        cidr_blocks = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+        prefix_list_ids = []
+        security_groups = []
+        self = false
         description = "LB access to port 80"
       }
     ]
   },
   {
-    app_name = "toptal_web"
-    port = 8081
-    lb_port = 80
+    app_name = "toptal-web"
+    port_mapping = [
+      {
+        containerPort = 8081
+        hostPort = 8081
+        protocol = "tcp"
+      }
+    ]
+    lb_http_port_map = {
+      default_http = {
+        listener_port = 80
+        target_group_port = 8081
+      }
+    }
     env_vars = [
       {
         name = "PORT"
@@ -102,6 +129,7 @@ apps = [
       unhealthy_threshold = 2
     }
     module_dir = "./api"
+    working_directory = "/usr/src/app"
     service_config = {
       cpu = 256
       memory = 1024
@@ -112,7 +140,11 @@ apps = [
         from_port = 80
         to_port = 80
         protocol = "tcp"
-        cidr_block = "0.0.0./0"
+        cidr_blocks = ["0.0.0.0/0"]
+        ipv6_cidr_blocks = ["::/0"]
+        prefix_list_ids = []
+        security_groups = []
+        self = false
         description = "LB access to port 80"
       }
     ]
@@ -123,4 +155,16 @@ fargate = {
   iam_group = "fargate_execution"
   iam_user = "fargate_user"
   group_policies = ["AmazonECS_FullAccess", "AmazonS3FullAccess"]
+  ecs_cluster = "toptal-ecs"
+  firelens_configuration = {
+    type = "fluentbit"
+    options = {}
+  }
+  log_configuration = {
+    logDriver = "awsfirelens"
+    options = {}
+  }
+  privileged = false
+  start_timeout = 60
+  stop_timeout = 60
 }

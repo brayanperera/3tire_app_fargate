@@ -2,12 +2,12 @@ FROM node:16.10.0
 MAINTAINER brayan.perera@gmail.com
 
 # Set ENV
-ENV PORT 5001
-ENV DB api
-ENV DBUSER api_user
-ENV DBPASS Ap1PasS123
-ENV DBHOST localhost
-ENV DBPORT 5432
+ENV PORT=5001
+ENV DB=api
+ENV DBUSER=api_user
+ENV DBPASS=Ap1PasS123
+ENV DBHOST=localhost
+ENV DBPORT=5432
 
 WORKDIR /usr/src/app
 COPY package*.json ./
