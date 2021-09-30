@@ -1,0 +1,46 @@
+version: '3.3'
+
+services:
+  api:
+    container_name: api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    image: "api:v0.1"
+    ports:
+      - "5001:5001"
+    restart: always
+    links:
+      - db
+    environment:
+      PORT: 5001
+      DB: api
+      DBUSER: api_user
+      DBPASS: Ap1PasS123
+      DBHOST: db
+      DBPORT: 5432
+  web:
+    container_name: web
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    image: "web:v0.1"
+    ports:
+      - "8081:8081"
+    restart: always
+    environment:
+      PORT: 8081
+      API_HOST: "http://api:5001"
+    links:
+      - api
+  db:
+    container_name: db
+    image: "docker.io/library/postgres:latest"
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: api_user
+      POSTGRES_PASSWORD: Ap1PasS123
+      POSTGRES_DB: api
+

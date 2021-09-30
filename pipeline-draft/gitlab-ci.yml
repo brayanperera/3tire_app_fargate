@@ -1,0 +1,29 @@
+variables:
+  DOCKER_REGISTRY: 000000000000.dkr.ecr.us-east-1.amazonaws.com
+  AWS_DEFAULT_REGION: us-east-1
+  API_APP_NAME: api
+  WEB_APP_NAME: web
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+
+publish:
+  stage: build
+  image:
+    name: docker:latest
+  services:
+    - docker:19-dind
+  before_script:
+    - apk add --no-cache curl jq python3 py3-pip
+    - pip install awscli
+    - aws ecr get-login-password | docker login --username AWS --password-stdin $DOCKER_REGISTRY
+    - aws --version
+    - docker info
+    - docker --version
+  script:
+    - cd $API_APP_NAME/
+    - docker build -t $DOCKER_REGISTRY/$API_APP_NAME:$CI_PIPELINE_IID .
+    - docker push $DOCKER_REGISTRY/$API_APP_NAME:$CI_PIPELINE_IID
+    - cd ../$WEB_APP_NAME/
+    - docker build -t $DOCKER_REGISTRY/$WEB_APP_NAME:$CI_PIPELINE_IID .
+    - docker push $DOCKER_REGISTRY/$WEB_APP_NAME:$CI_PIPELINE_IID
