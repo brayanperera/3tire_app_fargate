@@ -11,4 +11,6 @@ RUN npm install
 COPY . .
 EXPOSE 8081
 
+HEALTHCHECK CMD --interval=30s --timeout=3s curl --fail http://localhost:8081/status || exit 1
+
 CMD [ "npm", "start" ]

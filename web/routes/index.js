@@ -26,4 +26,8 @@ router.get('/', function(req, res, next) {
     );
 });
 
+router.get('/status', function(req, res, next) {
+    return res.status(200).send('success');
+});
+
 module.exports = router;

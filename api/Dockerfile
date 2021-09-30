@@ -15,5 +15,7 @@ RUN npm install
 COPY . .
 EXPOSE 5001
 
+HEALTHCHECK CMD --interval=30s --timeout=3s curl --fail http://localhost:5001 || exit 1
+
 CMD [ "npm", "start" ]
 
