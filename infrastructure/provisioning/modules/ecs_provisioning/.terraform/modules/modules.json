@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"ecs-cluster","Source":"cn-terraform/ecs-cluster/aws","Version":"1.0.7","Dir":".terraform/modules/ecs-cluster"}]}

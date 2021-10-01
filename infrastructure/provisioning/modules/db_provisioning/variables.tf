@@ -3,6 +3,16 @@ variable "db_availability_zones" {
   default = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
+variable "common_config" {
+  type = object({
+    aws_account_id = number
+    region = string
+    availability_zones = list(string)
+    environment = string
+    name_prefix = string
+  })
+}
+
 variable "subnets" {
   type = list(string)
   description = "VPC Subnets"

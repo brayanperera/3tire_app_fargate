@@ -44,22 +44,11 @@ variable "rds" {
   })
 }
 
-
 variable "apps" {
   type = list(object({
     app_name = string
-    port_mapping = list(object({
-      containerPort = number
-      hostPort = number
-      protocol = string
-    }))
-
-    lb_http_port_map = object({
-      default_http = object({
-        listener_port =  number
-        target_group_port = number
-      })
-    })
+    port = number
+    lb_port = number
     env_vars = list(object({
       name = string
       value = string
@@ -98,14 +87,7 @@ variable "fargate" {
     group_policies = list(string)
     iam_user = string
     ecs_cluster = string
-    firelens_configuration = object({
-      type = string
-      options = map(string)
-    })
-    log_configuration = object({
-      logDriver = string
-      options = map(string)
-    })
+    service_log_retention = number
     privileged = bool
     start_timeout = number
     stop_timeout  = number

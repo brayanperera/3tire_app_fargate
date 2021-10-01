@@ -1,3 +1,5 @@
+/* Security Groups for Application LBs */
+
 resource "aws_security_group" "app_sg" {
   count = length(var.apps)
   name        = var.apps[count.index].app_name
@@ -5,6 +7,7 @@ resource "aws_security_group" "app_sg" {
   vpc_id      = var.vpc_id
 
   tags = {
+    Name = var.apps[count.index].app_name
     Environment = var.common_config.environment
   }
 
@@ -14,11 +17,53 @@ resource "aws_security_group" "app_sg" {
 
 /* Log writing bucket for LBs */
 
+data "aws_elb_service_account" "main" {}
+
 resource "aws_s3_bucket" "app_lb_log_bucket" {
   count = length(var.apps)
-  name        = var.apps[count.index].app_name
-  bucket = "${var.apps[count.index].app_name}-log-bucket"
+  bucket = "${var.common_config.aws_account_id}-${var.apps[count.index].app_name}-log-bucket"
   acl    = "log-delivery-write"
+  policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::${data.aws_elb_service_account.main.id}:root"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${var.apps[count.index].app_name}-log-bucket/${var.apps[count.index].app_name}/AWSLogs/${var.common_config.aws_account_id}/*"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${var.apps[count.index].app_name}-log-bucket/${var.apps[count.index].app_name}/AWSLogs/${var.common_config.aws_account_id}/*",
+      "Condition": {
+        "StringEquals": {
+          "s3:x-amz-acl": "bucket-owner-full-control"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "delivery.logs.amazonaws.com"
+      },
+      "Action": "s3:GetBucketAcl",
+      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${var.apps[count.index].app_name}-log-bucket"
+    }
+  ]
+}
+POLICY
+
+  tags = {
+    Name = "${var.apps[count.index].app_name}-lb-log-bucket"
+    Environment = var.common_config.environment
+  }
 }
 
 resource "aws_lb" "app_lb" {
@@ -38,6 +83,7 @@ resource "aws_lb" "app_lb" {
   }
 
   tags = {
+    Name = "${var.apps[count.index].app_name}-lb"
     Environment = var.common_config.environment
   }
 }

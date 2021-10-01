@@ -10,20 +10,17 @@ variable "private_subnets_ids" {
 
 variable "default_security_group" {}
 
+variable "rds_db_endpoint" {}
+
+variable "aws_ecs_cluster_arn" {}
+
 variable "fargate" {
   type = object({
     iam_group = string
     group_policies = list(string)
     iam_user = string
     ecs_cluster = string
-    firelens_configuration = object({
-      type = string
-      options = map(string)
-    })
-    log_configuration = object({
-      logDriver = string
-      options = map(string)
-    })
+    service_log_retention = number
     privileged = bool
     start_timeout = number
     stop_timeout  = number
@@ -39,21 +36,10 @@ variable "common_config" {
   })
 }
 
-variable "apps" {
-  type = list(object({
+variable "app" {
     app_name = string
-    port_mapping = list(object({
-      containerPort = number
-      hostPort = number
-      protocol = string
-    }))
-
-    lb_http_port_map = object({
-      default_http = object({
-        listener_port =  number
-        target_group_port = number
-      })
-    })
+    port = number
+    lb_port = number
     env_vars = list(object({
       name = string
       value = string
@@ -71,6 +57,7 @@ variable "apps" {
       cpu = number
       memory = number
       count = number
+      memory_reservation = number
     })
     sec_group_rules = list(object({
       from_port   = number
@@ -83,5 +70,4 @@ variable "apps" {
       self = bool
       description = string
     }))
-  }))
 }

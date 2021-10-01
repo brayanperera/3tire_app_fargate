@@ -36,6 +36,10 @@ app.get('/api/status', function(req, res) {
   pool.end()
 });
 
+app.get('/status', function(req, res) {
+    return res.status(200).send('success');
+}
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');

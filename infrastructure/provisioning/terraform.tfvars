@@ -31,25 +31,14 @@ rds = {
   db_pass = "Ap1PasS123"
   backup_retention_period = 5
   backup_window = "01:00-03:00"
-  maintenance_window = "04:00-06:00"
+  maintenance_window = "mon:04:00-mon:06:00"
 }
 
 apps = [
   {
     app_name = "toptal-api"
-    port_mapping = [
-      {
-        containerPort = 5001
-        hostPort = 5001
-        protocol = "tcp"
-      }
-    ]
-    lb_http_port_map = {
-      default_http = {
-        listener_port = 80
-        target_group_port = 5001
-      }
-    }
+    port = 5001
+    lb_port = 80
     env_vars = [
       {
         name = "PORT"
@@ -68,16 +57,12 @@ apps = [
         value = "Ap1PasS123"
       },
       {
-        name = "DBHOST"
-        value = "localhost"
-      },
-      {
         name = "DBPORT"
         value = "5432"
       }
     ]
     health_check = {
-      path = "/api/status"
+      path = "/status"
       interval = 30
       timeout = 5
       healthy_threshold = 2
@@ -106,19 +91,8 @@ apps = [
   },
   {
     app_name = "toptal-web"
-    port_mapping = [
-      {
-        containerPort = 8081
-        hostPort = 8081
-        protocol = "tcp"
-      }
-    ]
-    lb_http_port_map = {
-      default_http = {
-        listener_port = 80
-        target_group_port = 8081
-      }
-    }
+    port = 8081
+    lb_port = 80
     env_vars = [
       {
         name = "PORT"
@@ -130,7 +104,7 @@ apps = [
       }
     ]
     health_check = {
-      path = "/"
+      path = "/status"
       interval = 30
       timeout = 5
       healthy_threshold = 2
@@ -164,14 +138,7 @@ fargate = {
   iam_user = "fargate_user"
   group_policies = ["AmazonECS_FullAccess", "AmazonS3FullAccess"]
   ecs_cluster = "toptal-ecs"
-  firelens_configuration = {
-    type = "fluentbit"
-    options = {}
-  }
-  log_configuration = {
-    logDriver = "awsfirelens"
-    options = {}
-  }
+  service_log_retention = 15
   privileged = false
   start_timeout = 60
   stop_timeout = 60

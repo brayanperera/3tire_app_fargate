@@ -23,10 +23,10 @@ output "private_subnet_ids" {
   value = module.vpc_provisioning.vpc_private_subnet_ids
 }
 
-#output "rds_endpoint" {
-#  value = module.db_provisioning.rds_endpoint
-#}
-#
-#output "rds_read_endpoint" {
-#  value = module.db_provisioning.rds_read_endpoint
-#}
+output "rds_endpoint" {
+  value = module.db_provisioning.rds_endpoint
+}
+
+output "ecs_cluster_id" {
+  value = module.ecs_provisioning.aws_ecs_cluster_cluster_id
+}

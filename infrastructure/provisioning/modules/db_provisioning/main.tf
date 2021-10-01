@@ -4,11 +4,12 @@ resource "aws_db_subnet_group" "toptal_db_subnet" {
 
   tags = {
     Name = "Toptal Postgres Access subnets"
+    Environment = var.common_config.environment
   }
 }
 
 resource "aws_db_parameter_group" "toptal_db" {
-  name   = "toptal_app"
+  name   = "toptal-db"
   family = "postgres13"
 
   parameter {
@@ -33,4 +34,9 @@ resource "aws_db_instance" "toptal_db" {
   backup_retention_period = var.rds.backup_retention_period
   backup_window     = var.rds.backup_window
   maintenance_window = var.rds.maintenance_window
+
+  tags = {
+    Name = var.rds.instance_name
+    Environment = var.common_config.environment
+  }
 }

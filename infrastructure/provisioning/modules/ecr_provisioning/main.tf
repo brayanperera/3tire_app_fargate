@@ -4,6 +4,7 @@ resource "aws_iam_user" "ecr_user" {
 
   tags = {
     tag-key = "ecr"
+    Environment = var.common_config.environment
   }
 }
 
