@@ -2,11 +2,14 @@ common_config = {
   aws_account_id = "763511508504"
   region = "us-east-1"
   availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  environment = "production"
+  environment = "prod"
+  name_prefix = "toptal"
 }
 
 ecr = {
   ecr_user = "ecr_user"
+  github_repo = "brayanperera/3tire_app_fargate"
+  github_repo_env = "prod"
 }
 
 vpc = {
@@ -17,14 +20,18 @@ vpc = {
 }
 
 rds = {
-  cluster_name = "toptal-rds"
+  instance_name = "toptal-rds-db"
   instance_class = "db.t3.micro"
-  engine = "postgresql"
+  allocated_storage = 5
+  storage_type = "gp2"
+  engine = "postgres"
+  engine_version = "13.3"
   db_name = "toptal_api"
   db_user = "api_user"
   db_pass = "Ap1PasS123"
   backup_retention_period = 5
-  preferred_backup_window = "01:00-03:00"
+  backup_window = "01:00-03:00"
+  maintenance_window = "04:00-06:00"
 }
 
 apps = [

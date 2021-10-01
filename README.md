@@ -32,6 +32,8 @@ Terraform and maintain the CI/CD via GitHub Actions workflows.
    9. Initialize terraform and apply to deploy the AWS infrastructure
       1. ````
          terraform init
+         export GITHUB_TOKEN="" # Place your GitHub token
+         export GITHUB_ORGANIZATION="" # Place your GitHub Organization 
          terraform plan
          terraform apply
          ````

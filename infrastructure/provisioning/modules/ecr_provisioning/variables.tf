@@ -6,3 +6,7 @@ variable "ecr_user" {
 variable "apps" {
   type = list(string)
 }
+
+variable "github_repo" {}
+
+variable "github_repo_env" {}

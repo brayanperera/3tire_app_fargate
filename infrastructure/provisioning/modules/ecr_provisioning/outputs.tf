@@ -11,11 +11,6 @@ output "user_secret" {
  sensitive = true
 }
 
-output "user_secret_encrypted" {
- value = aws_iam_access_key.ecr_user_key.encrypted_secret
- sensitive = true
-}
-
 output "ecr_urls" {
  value = aws_ecr_repository.app[*].repository_url
 }

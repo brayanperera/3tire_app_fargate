@@ -1,19 +1,10 @@
-terraform {
-  backend "s3" {
-    bucket         = "toptal-tire3-app-brayan-tf-state"
-    key            = "global/s3/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "toptal_3tire_app_infra_locks"
-    encrypt        = true
-  }
-}
-
 module "ecr_provisioning" {
   source = "./modules/ecr_provisioning"
   ecr_user = var.ecr.ecr_user
   apps = var.apps[*].app_name
+  github_repo = var.ecr.github_repo
+  github_repo_env = var.ecr.github_repo_env
 }
-
 
 module "vpc_provisioning" {
   source = "./modules/vpc_provisioning"
@@ -21,24 +12,24 @@ module "vpc_provisioning" {
   vpc = var.vpc
 }
 
-module "db_provisioning" {
-  source = "./modules/db_provisioning"
-  security_groups = module.vpc_provisioning.security_groups
-  subnets         = module.vpc_provisioning.vpc_private_subnet_ids
-  db_availability_zones = var.common_config.availability_zones
-  rds = var.rds
-}
-
-module "fargate_provisioning" {
-  source = "./modules/fargate_provisioning"
-  vpc_id = module.vpc_provisioning.vpc_id
-  public_subnets_ids = module.vpc_provisioning.vpc_public_subnet_ids
-  private_subnets_ids = module.vpc_provisioning.vpc_private_subnet_ids
-  default_security_group = module.vpc_provisioning.default_sec_group_id
-  common_config = var.common_config
-  fargate = var.fargate
-  apps = var.apps
-}
+#module "db_provisioning" {
+#  source = "./modules/db_provisioning"
+#  security_groups = module.vpc_provisioning.security_groups
+#  subnets         = module.vpc_provisioning.vpc_private_subnet_ids
+#  db_availability_zones = var.common_config.availability_zones
+#  rds = var.rds
+#}
+#
+#module "fargate_provisioning" {
+#  source = "./modules/fargate_provisioning"
+#  vpc_id = module.vpc_provisioning.vpc_id
+#  public_subnets_ids = module.vpc_provisioning.vpc_public_subnet_ids
+#  private_subnets_ids = module.vpc_provisioning.vpc_private_subnet_ids
+#  default_security_group = module.vpc_provisioning.default_sec_group_id
+#  common_config = var.common_config
+#  fargate = var.fargate
+#  apps = var.apps
+#}
 
 #
 #module "lb_provisioning" {

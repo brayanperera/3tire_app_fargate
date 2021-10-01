@@ -15,14 +15,17 @@ variable "security_groups" {
 
 variable "rds" {
   type = object({
-      instance_name = string
-      instance_class = string
-      engine = string
-      engine_version = string
-      db_name = string
-      db_user = string
-      db_pass = string
-      backup_retention_period = number
-      preferred_backup_window = string
+    instance_name = string
+    instance_class = string
+    allocated_storage = number
+    storage_type = string
+    engine = string
+    engine_version = string
+    db_name = string
+    db_user = string
+    db_pass = string
+    backup_retention_period = number
+    backup_window = string
+    maintenance_window = string
   })
 }

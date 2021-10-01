@@ -10,6 +10,7 @@ name: Build docker containers and deploy to AWS Fargate
 
 jobs:
   build_and_push_containers:
+    environment: prod
     runs-on: ubuntu-20.04
     strategy:
       matrix:

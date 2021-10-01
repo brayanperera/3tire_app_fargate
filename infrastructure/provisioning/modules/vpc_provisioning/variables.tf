@@ -4,6 +4,7 @@ variable "common_config" {
     region = string
     availability_zones = list(string)
     environment = string
+    name_prefix = string
   })
 }
 

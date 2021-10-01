@@ -1,11 +1,7 @@
 output "rds_cluster_id" {
-  value = aws_rds_cluster.rds_cluster.id
+  value = aws_db_instance.toptal_db.id
 }
 
 output "rds_endpoint" {
-  value = aws_rds_cluster.rds_cluster.endpoint
-}
-
-output "rds_read_endpoint" {
-  value = aws_rds_cluster.rds_cluster.reader_endpoint
+  value = aws_db_instance.toptal_db.endpoint
 }

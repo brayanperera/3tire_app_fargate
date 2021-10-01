@@ -4,8 +4,19 @@ variable "common_config" {
     region = string
     availability_zones = list(string)
     environment = string
+    name_prefix = string
   })
 }
+
+variable "ecr" {
+  type = object({
+    ecr_user = string
+    github_repo = string
+    github_repo_env = string
+  })
+}
+
+variable "github_token" {}
 
 variable "vpc" {
   type = object({
@@ -18,21 +29,21 @@ variable "vpc" {
 
 variable "rds" {
   type = object({
-      cluster_name = string
-      engine_type = string
-      db_name = string
-      db_user = string
-      db_pass = string
-      backup_retention_period = number
-      preferred_backup_window = string
+    instance_name = string
+    instance_class = string
+    allocated_storage = number
+    storage_type = string
+    engine = string
+    engine_version = string
+    db_name = string
+    db_user = string
+    db_pass = string
+    backup_retention_period = number
+    backup_window = string
+    maintenance_window = string
   })
 }
 
-variable "ecr" {
-  type = object({
-    ecr_user = string
-  })
-}
 
 variable "apps" {
   type = list(object({

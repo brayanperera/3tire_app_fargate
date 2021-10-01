@@ -11,11 +11,6 @@ output "ecr_user_secret_key" {
   sensitive = true
 }
 
-output "user_secret_encrypted" {
- value = module.ecr_provisioning.user_secret_encrypted
- sensitive = true
-}
-
 output "vpc_id" {
   value = module.vpc_provisioning.vpc_id
 }
@@ -28,14 +23,10 @@ output "private_subnet_ids" {
   value = module.vpc_provisioning.vpc_private_subnet_ids
 }
 
-output "rds_cluster_id" {
-  value = module.db_provisioning.rds_cluster_id
-}
-
-output "rds_endpoint" {
-  value = module.db_provisioning.rds_endpoint
-}
-
-output "rds_read_endpoint" {
-  value = module.db_provisioning.rds_read_endpoint
-}
+#output "rds_endpoint" {
+#  value = module.db_provisioning.rds_endpoint
+#}
+#
+#output "rds_read_endpoint" {
+#  value = module.db_provisioning.rds_read_endpoint
+#}

@@ -1,5 +1,5 @@
-resource "aws_db_subnet_group" "default" {
-  name       = "main"
+resource "aws_db_subnet_group" "toptal_db_subnet" {
+  name       = "toptal_db_subnet"
   subnet_ids = var.subnets
 
   tags = {
@@ -7,7 +7,7 @@ resource "aws_db_subnet_group" "default" {
   }
 }
 
-resource "aws_db_parameter_group" "toptal_app" {
+resource "aws_db_parameter_group" "toptal_db" {
   name   = "toptal_app"
   family = "postgres13"
 
@@ -17,17 +17,20 @@ resource "aws_db_parameter_group" "toptal_app" {
   }
 }
 
-resource "aws_db_instance" "toptal_app" {
+resource "aws_db_instance" "toptal_db" {
   identifier             = var.rds.instance_name
   instance_class         = var.rds.instance_class
-  allocated_storage      = 5
+  allocated_storage      = var.rds.allocated_storage
   engine                 = var.rds.engine
   engine_version         = var.rds.engine_version
+  name                   = var.rds.db_name
   username               = var.rds.db_user
   password               = var.rds.db_pass
-  db_subnet_group_name   = aws_db_subnet_group.default.name
+  db_subnet_group_name   = aws_db_subnet_group.toptal_db_subnet.name
   vpc_security_group_ids = var.security_groups
-  parameter_group_name   = aws_db_parameter_group.toptal_app.name
-  publicly_accessible    = true
+  parameter_group_name   = aws_db_parameter_group.toptal_db.name
   skip_final_snapshot    = true
+  backup_retention_period = var.rds.backup_retention_period
+  backup_window     = var.rds.backup_window
+  maintenance_window = var.rds.maintenance_window
 }

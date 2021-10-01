@@ -60,3 +60,17 @@ resource "aws_ecr_repository" "app" {
     scan_on_push = true
   }
 }
+
+resource "github_actions_environment_secret" "ecr_access_key" {
+  repository       = "3tire_app_fargate"
+  environment      = "prod"
+  secret_name      = "AWS_ECR_USER_ACCESS_KEY"
+  plaintext_value  = aws_iam_access_key.ecr_user_key.id
+}
+
+resource "github_actions_environment_secret" "ecr_secret_key" {
+  repository       = "3tire_app_fargate"
+  environment      = "prod"
+  secret_name      = "AWS_ECR_USER_SECRET_KEY"
+  plaintext_value  = aws_iam_access_key.ecr_user_key.secret
+}
