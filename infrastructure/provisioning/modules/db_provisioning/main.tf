@@ -7,15 +7,27 @@ resource "aws_db_subnet_group" "default" {
   }
 }
 
-resource "aws_rds_cluster" "rds_cluster" {
-  cluster_identifier      = var.rds.cluster_name
-  engine                  = "aurora-postgresql"
-  availability_zones      = var.db_availability_zones
-  database_name           = var.rds.db_name
-  master_username         = var.rds.db_user
-  master_password         = var.rds.db_pass
-  backup_retention_period = var.rds.backup_retention_period
-  preferred_backup_window = var.rds.preferred_backup_window
+resource "aws_db_parameter_group" "toptal_app" {
+  name   = "toptal_app"
+  family = "postgres13"
+
+  parameter {
+    name  = "log_connections"
+    value = "1"
+  }
+}
+
+resource "aws_db_instance" "toptal_app" {
+  identifier             = var.rds.instance_name
+  instance_class         = var.rds.instance_class
+  allocated_storage      = 5
+  engine                 = var.rds.engine
+  engine_version         = var.rds.engine_version
+  username               = var.rds.db_user
+  password               = var.rds.db_pass
+  db_subnet_group_name   = aws_db_subnet_group.default.name
   vpc_security_group_ids = var.security_groups
-  db_subnet_group_name = aws_db_subnet_group.default.name
+  parameter_group_name   = aws_db_parameter_group.toptal_app.name
+  publicly_accessible    = true
+  skip_final_snapshot    = true
 }

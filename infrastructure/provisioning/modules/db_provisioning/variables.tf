@@ -15,8 +15,10 @@ variable "security_groups" {
 
 variable "rds" {
   type = object({
-      cluster_name = string
-      engine_type = string
+      instance_name = string
+      instance_class = string
+      engine = string
+      engine_version = string
       db_name = string
       db_user = string
       db_pass = string

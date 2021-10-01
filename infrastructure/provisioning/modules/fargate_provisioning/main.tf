@@ -18,7 +18,7 @@ module "ecs-fargate" {
 
   container_image = "${var.common_config.aws_account_id}.dkr.ecr.${var.common_config.region}.amazonaws.com/${var.apps[count.index].app_name}:latest"
   container_name = var.apps[count.index].app_name
-  name_prefix = var.fargate.ecs_cluster
+  name_prefix = var.apps[count.index].app_name
   private_subnets_ids = var.private_subnets_ids
   public_subnets_ids = var.public_subnets_ids
   vpc_id = var.vpc_id
@@ -40,5 +40,6 @@ module "ecs-fargate" {
   lb_target_group_health_check_timeout  = var.apps[count.index].health_check.timeout
   port_mappings = var.apps[count.index].port_mapping
   lb_http_ports = var.apps[count.index].lb_http_port_map
-  lb_https_ports = null
+  lb_https_ports = {}
+  container_memory_reservation = 512
 }

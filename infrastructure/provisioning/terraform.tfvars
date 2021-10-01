@@ -18,7 +18,8 @@ vpc = {
 
 rds = {
   cluster_name = "toptal-rds"
-  engine_type = "aurora-postgresql"
+  instance_class = "db.t3.micro"
+  engine = "postgresql"
   db_name = "toptal_api"
   db_user = "api_user"
   db_pass = "Ap1PasS123"
@@ -79,7 +80,7 @@ apps = [
     working_directory = "/usr/src/app"
     service_config = {
       cpu = 256
-      memory = 1024
+      memory = 512
       count = 2
     }
     sec_group_rules = [
@@ -132,7 +133,7 @@ apps = [
     working_directory = "/usr/src/app"
     service_config = {
       cpu = 256
-      memory = 1024
+      memory = 512
       count = 2
     }
     sec_group_rules = [
