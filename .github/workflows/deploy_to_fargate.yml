@@ -10,7 +10,6 @@ name: Build docker containers and deploy to AWS Fargate
 
 jobs:
   upload_cdn_content:
-    envrironment: prod
     environment: prod
     runs-on: ubuntu-20.04
     strategy:
