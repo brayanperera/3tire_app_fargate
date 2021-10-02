@@ -4,6 +4,7 @@ MAINTAINER brayan.perera@gmail.com
 # Set ENV
 ENV PORT=8081
 ENV API_HOST=http://localhost:5001
+ENV CDN_URL=http://localhost
 
 WORKDIR /usr/src/app
 COPY package*.json ./

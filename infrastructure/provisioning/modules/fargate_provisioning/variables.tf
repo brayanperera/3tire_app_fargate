@@ -18,6 +18,8 @@ variable "aws_ecs_cluster_arn" {}
 
 variable "task_role_arn" {}
 
+variable "cdn_url" {}
+
 variable "fargate" {
   type = object({
     iam_group = string

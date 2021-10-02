@@ -26,6 +26,11 @@ locals {
     name = "DBHOST"
     value = var.rds_db_endpoint
   }
+
+  cdn_url_env = {
+    name = "CDN_URL"
+    value = var.cdn_url
+  }
 }
 
 module "task_def" {
@@ -44,7 +49,7 @@ module "task_def" {
   }
   container_cpu = var.app.service_config.cpu
   working_directory = var.app.working_directory
-  environment  = concat(var.app.env_vars, var.app.app_name == "toptal-api" ? [local.db_host_env]: [])
+  environment  = concat(var.app.env_vars, var.app.app_name == "toptal-api" ? [local.db_host_env]: [], var.app.app_name == "toptal-web" ? [local.cdn_url_env]: [])
   log_configuration = {
     logDriver = "awslogs"
     options = {

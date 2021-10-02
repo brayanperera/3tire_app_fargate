@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var request = require('request');
-
+var cdn_url = process.env.CDN_URL
 
 var api_url = process.env.API_HOST + '/api/status';
 
@@ -19,7 +19,8 @@ router.get('/', function(req, res, next) {
                 res.render('index', {
                     title: '3tier App',
                     request_uuid: body[0].request_uuid,
-                    time: body[0].time
+                    time: body[0].time,
+                    cdn: cdn_url
                 });
             }
         }
