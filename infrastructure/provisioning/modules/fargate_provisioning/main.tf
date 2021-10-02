@@ -1,3 +1,13 @@
+/* Provision ALB */
+module "lb_provisioning" {
+  source = "../lb_provisioning"
+  common_config = var.common_config
+  app = var.app
+  vpc_id = var.vpc_id
+  default_sec_group_id = var.default_security_group
+  subnet_ids = var.lb_subnet_ids
+}
+
 /* Cloudwatch logs */
 resource "aws_cloudwatch_log_group" "toptal_logs" {
   name = "${var.app.app_name}-logs"
@@ -48,15 +58,55 @@ module "task_def" {
   stop_timeout = var.fargate.stop_timeout
 }
 
-module "ecs-fargate-service" {
-  source  = "cn-terraform/ecs-fargate-service/aws"
-  version = "2.0.15"
+resource "aws_ecs_service" "app_service" {
+  name            = "${var.app.app_name}-service"
+  cluster         = var.aws_ecs_cluster_arn
+  task_definition = module.task_def.aws_ecs_task_definition_td_arn
+  desired_count   = var.app.service_config.count
+  iam_role        = var.task_role_arn
 
-  container_name      = var.app.app_name
-  ecs_cluster_arn     = var.aws_ecs_cluster_arn
-  name_prefix         = var.fargate.ecs_cluster
-  private_subnets     = var.private_subnets_ids
-  public_subnets      = var.public_subnets_ids
-  task_definition_arn = module.task_def.aws_ecs_task_definition_td_arn
-  vpc_id              = var.vpc_id
+  ordered_placement_strategy {
+    type  = "binpack"
+    field = "cpu"
+  }
+
+  load_balancer {
+    target_group_arn = module.lb_provisioning.app_tg_arn
+    container_name   = var.app.app_name
+    container_port   = var.app.port
+  }
+
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:ecs.availability-zone in ${var.common_config.availability_zones}"
+  }
+
+  network_configuration {
+    security_groups  = var.default_security_group
+    subnets          = var.app.assign_public_ip ? var.private_subnets_ids : var.private_subnets_ids
+    assign_public_ip = var.app.assign_public_ip
+  }
+}
+
+module "ecs-autoscaling" {
+  count = var.app.autoscaling.enable_autoscaling ? 1 : 0
+
+  source  = "cn-terraform/ecs-service-autoscaling/aws"
+  version = "1.0.3"
+
+  name_prefix               = var.fargate.ecs_cluster
+  ecs_cluster_name          = var.fargate.ecs_cluster
+  ecs_service_name          = aws_ecs_service.app_service.name
+  max_cpu_threshold         = var.app.autoscaling.max_cpu_threshold
+  min_cpu_threshold         = var.app.autoscaling.min_cpu_threshold
+  max_cpu_evaluation_period = var.app.autoscaling.max_cpu_evaluation_period
+  min_cpu_evaluation_period = var.app.autoscaling.min_cpu_evaluation_period
+  max_cpu_period            = var.app.autoscaling.max_cpu_period
+  min_cpu_period            = var.app.autoscaling.min_cpu_period
+  scale_target_max_capacity = var.app.autoscaling.scale_target_max_capacity
+  scale_target_min_capacity = var.app.autoscaling.scale_target_min_capacity
+  tags                      = {
+    Name        = var.fargate.ecs_cluster
+    Environment = var.common_config.environment
+  }
 }

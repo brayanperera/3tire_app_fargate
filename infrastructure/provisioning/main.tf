@@ -22,17 +22,6 @@ module "db_provisioning" {
   common_config = var.common_config
 }
 
-
-module "lb_provisioning" {
-  source = "./modules/lb_provisioning"
-  common_config = var.common_config
-  vpc = var.vpc
-  apps = var.apps
-  vpc_id = module.vpc_provisioning.vpc_id
-  default_sec_group_id = module.vpc_provisioning.default_sec_group_id
-  subnet_ids = module.vpc_provisioning.vpc_public_subnet_ids
-}
-
 module "ecs_provisioning" {
   source = "./modules/ecs_provisioning"
   common_config = var.common_config

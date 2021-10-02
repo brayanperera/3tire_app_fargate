@@ -49,6 +49,7 @@ variable "apps" {
     app_name = string
     port = number
     lb_port = number
+    assign_public_ip = bool
     env_vars = list(object({
       name = string
       value = string

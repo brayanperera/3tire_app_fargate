@@ -39,6 +39,7 @@ apps = [
     app_name = "toptal-api"
     port = 5001
     lb_port = 80
+    assign_public_ip = false
     env_vars = [
       {
         name = "PORT"
@@ -93,6 +94,7 @@ apps = [
     app_name = "toptal-web"
     port = 8081
     lb_port = 80
+    assign_public_ip = false
     env_vars = [
       {
         name = "PORT"
