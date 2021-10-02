@@ -1,6 +1,7 @@
 common_config = {
   aws_account_id = "763511508504"
   region = "us-east-1"
+  failover_region = "us-west-2"
   availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
   environment = "prod"
   name_prefix = "toptal"
@@ -144,4 +145,31 @@ fargate = {
   privileged = false
   start_timeout = 60
   stop_timeout = 60
+}
+
+cdn = {
+  name = "3tire_app_cdn"
+  s3_bucket_prefix = "toptal-brayan-perera"
+  group_origin = "group-cdn"
+  primary_origin = "primary-cdn"
+  failover_origin = "failover-cdn"
+  failover_status_codes = [403, 404, 500, 502]
+  origin_access_identity_name = "toptal-3tire-app-cdn"
+  log_bucket = "3tire-app-cdn-log-store"
+  restriction = {
+    restriction_type = "none"
+    locations = []
+  }
+  ttl = {
+    min_ttl = 0
+    default_ttl = 3600
+    max_ttl = 86400
+  }
+  description = "Toptal 3Tire app CDN"
+  default_root_object = "index.html"
+  cache_behavior = {
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods = ["GET", "HEAD"]
+  }
+  cdn_user = "toptal_cdn_user"
 }

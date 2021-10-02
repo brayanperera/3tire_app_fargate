@@ -30,3 +30,20 @@ output "rds_endpoint" {
 output "ecs_cluster_id" {
   value = module.ecs_provisioning.aws_ecs_cluster_cluster_id
 }
+
+output "user_arn" {
+ value = module.cdn_provisioning.user_arn
+}
+
+output "user_access_key" {
+ value = module.cdn_provisioning.user_access_key
+}
+
+output "user_secret" {
+ value = module.cdn_provisioning.user_secret
+ sensitive = true
+}
+
+output "cdn_url" {
+  value = module.cdn_provisioning.cdn_url
+}

@@ -48,3 +48,10 @@ jobs:
           docker tag $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
           docker push $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
           docker push $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
+      - name: Upload CDN content
+        uses: shallwefootball/s3-upload-action@master
+          with:
+            aws_key_id: ${{ secrets.AWS_CDN_USER_ACCESS_KEY }}
+            aws_secret_access_key: ${{ secrets.AWS_CDN_USER_SECRET_KEY}}
+            aws_bucket: ${{ secrets.AWS_CDN_DOMAIN }}
+            source_dir: 'web/public'
