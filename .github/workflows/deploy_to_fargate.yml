@@ -20,21 +20,15 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_CDN_USER_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_CDN_USER_SECRET_KEY }}
-          aws-region: us-east-1
-
-      - name: Upload CDN content
-        uses: shallwefootball/s3-upload-action@master
-        with:
-          aws_key_id: ${{ secrets.AWS_CDN_USER_ACCESS_KEY }}
-          aws_secret_access_key: ${{ secrets.AWS_CDN_USER_SECRET_KEY}}
-          aws_bucket: ${{ matrix.bucket }}
-          source_dir: 'web/public'
-          destination_dir: 'public'
+    - uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --follow-symlinks --delete
+      env:
+        AWS_S3_BUCKET: ${{ matrix.bucket.AWS_S3_BUCKET }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_CDN_USER_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_CDN_USER_SECRET_KEY }}
+        AWS_REGION: 'us-east-1'   # optional: defaults to us-east-1
+        SOURCE_DIR: 'web/public'      # optional: defaults to entire repository
 
   build_and_push_containers:
     environment: prod
