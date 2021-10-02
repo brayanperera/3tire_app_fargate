@@ -31,15 +31,15 @@ output "ecs_cluster_id" {
   value = module.ecs_provisioning.aws_ecs_cluster_cluster_id
 }
 
-output "user_arn" {
+output "cdn_user_arn" {
  value = module.cdn_provisioning.user_arn
 }
 
-output "user_access_key" {
+output "cdn_user_access_key" {
  value = module.cdn_provisioning.user_access_key
 }
 
-output "user_secret" {
+output "cdn_user_secret" {
  value = module.cdn_provisioning.user_secret
  sensitive = true
 }

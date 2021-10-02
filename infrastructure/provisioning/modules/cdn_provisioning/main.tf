@@ -61,16 +61,7 @@ resource "aws_iam_user_policy" "cdn_s3_user_policy" {
          "Sid": "PermissionForS3BucketOperations",
          "Effect": "Allow",
          "Action": [
-            "s3:ListBucket",
-            "s3:GetBucketLocation",
-            "s3:GetObject",
-            "s3:PutObject",
-            "s3:DeleteObject",
-            "s3:GetObjectVersion",
-            "s3:GetBucketPolicy",
-            "s3:GetBucketAcl",
-            "s3:GetBucketVersioning",
-            "s3:GetLifecycleConfiguration"
+            "s3:*"
          ],
          "Resource": [
             "arn:aws:s3:::${var.cdn.s3_bucket_prefix}-${var.cdn.primary_origin}/*",
@@ -96,16 +87,7 @@ resource "aws_s3_bucket_policy" "bucket_policy_cdn_s3_user_primary" {
             "AWS": "arn:aws:iam::${var.common_config.aws_account_id}:user/system/${var.cdn.cdn_user}"
          },
          "Action": [
-            "s3:ListBucket",
-            "s3:GetBucketLocation",
-            "s3:GetObject",
-            "s3:PutObject",
-            "s3:DeleteObject",
-            "s3:GetObjectVersion",
-            "s3:GetBucketPolicy",
-            "s3:GetBucketAcl",
-            "s3:GetBucketVersioning",
-            "s3:GetLifecycleConfiguration"
+            "s3:*"
          ],
          "Resource": [
             "arn:aws:s3:::${var.cdn.s3_bucket_prefix}-${var.cdn.primary_origin}",
@@ -131,16 +113,7 @@ resource "aws_s3_bucket_policy" "bucket_policy_cdn_s3_user_failover" {
             "AWS": "arn:aws:iam::${var.common_config.aws_account_id}:user/system/${var.cdn.cdn_user}"
          },
          "Action": [
-            "s3:ListBucket",
-            "s3:GetBucketLocation",
-            "s3:GetObject",
-            "s3:PutObject",
-            "s3:DeleteObject",
-            "s3:GetObjectVersion",
-            "s3:GetBucketPolicy",
-            "s3:GetBucketAcl",
-            "s3:GetBucketVersioning",
-            "s3:GetLifecycleConfiguration"
+            "s3:*"
          ],
          "Resource": [
             "arn:aws:s3:::${var.cdn.s3_bucket_prefix}-${var.cdn.failover_origin}",
