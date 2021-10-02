@@ -17,6 +17,16 @@ jobs:
         bucket: [toptal-brayan-perera-primary-cdn, toptal-brayan-perera-failover-cdn]
 
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ECR_USER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_ECR_USER_SECRET_KEY }}
+          aws-region: us-east-1
+
       - name: Upload CDN content
         uses: shallwefootball/s3-upload-action@master
         with:
