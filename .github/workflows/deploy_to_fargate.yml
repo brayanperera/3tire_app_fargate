@@ -17,14 +17,14 @@ jobs:
       matrix:
         bucket: [toptal-brayan-perera-primary-cdn, toptal-brayan-perera-failover-cdn]
 
-      steps:
-        - name: Upload CDN content
-          uses: shallwefootball/s3-upload-action@master
-          with:
-            aws_key_id: ${{ secrets.AWS_CDN_USER_ACCESS_KEY }}
-            aws_secret_access_key: ${{ secrets.AWS_CDN_USER_SECRET_KEY}}
-            aws_bucket: ${{ matrix.bucket }}
-            source_dir: 'web/public'
+    steps:
+      - name: Upload CDN content
+        uses: shallwefootball/s3-upload-action@master
+        with:
+          aws_key_id: ${{ secrets.AWS_CDN_USER_ACCESS_KEY }}
+          aws_secret_access_key: ${{ secrets.AWS_CDN_USER_SECRET_KEY}}
+          aws_bucket: ${{ matrix.bucket }}
+          source_dir: 'web/public'
 
   build_and_push_containers:
     environment: prod
@@ -65,10 +65,3 @@ jobs:
           docker tag $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
           docker push $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
           docker push $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
-      - name: Upload CDN content
-        uses: shallwefootball/s3-upload-action@master
-        with:
-          aws_key_id: ${{ secrets.AWS_CDN_USER_ACCESS_KEY }}
-          aws_secret_access_key: ${{ secrets.AWS_CDN_USER_SECRET_KEY}}
-          aws_bucket: ${{ secrets.AWS_CDN_DOMAIN }}
-          source_dir: 'web/public'
