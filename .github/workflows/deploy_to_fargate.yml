@@ -90,10 +90,14 @@ jobs:
           aws-region: us-east-1
 
       - name: Get task definition
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           aws ecs describe-task-definition --task-definition ${{ matrix.TASK_DEF }} | jq ".taskDefinition"> ${{ matrix.TASK_DEF }}.json
           pwd
           cat ${{ matrix.TASK_DEF }}.json
+          echo $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
 
       - name: Fill in the new image ID in the Amazon Fargate task definition
         id: task-def
