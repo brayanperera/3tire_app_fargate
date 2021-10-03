@@ -72,6 +72,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR
+        id: image_build
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
@@ -81,6 +82,7 @@ jobs:
           docker tag $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
           docker push $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
           docker push $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
+          echo "::set-output name=image::$ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG"
 
       - name: Configure AWS credentials for Fargate
         uses: aws-actions/configure-aws-credentials@v1
@@ -94,10 +96,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          aws ecs describe-task-definition --task-definition ${{ matrix.TASK_DEF }} | jq ".taskDefinition"> ${{ matrix.TASK_DEF }}.json
-          pwd
-          cat ${{ matrix.TASK_DEF }}.json
-          echo $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
+          aws ecs describe-task-definition --task-definition ${{ matrix.TASK_DEF }} --query taskDefinition > ${{ matrix.TASK_DEF }}.json
 
       - name: Fill in the new image ID in the Amazon Fargate task definition
         id: task-def
@@ -108,7 +107,7 @@ jobs:
         with:
           task-definition: ${{ matrix.TASK_DEF }}.json
           container-name: ${{ matrix.IMAGE_NAME }}
-          image: $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
+          image: ${{ steps.image_build.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
