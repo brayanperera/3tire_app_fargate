@@ -38,7 +38,7 @@ app.get('/api/status', function(req, res) {
 
 app.get('/status', function(req, res) {
     return res.status(200).send('success');
-}
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
