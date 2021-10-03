@@ -12,6 +12,8 @@ jobs:
   upload_cdn_content:
     environment: prod
     runs-on: ubuntu-20.04
+    env:
+      EMAIL_LIST: 'brayan.perera@gmail.com,brayan.perera@hotmail.com'
     strategy:
       matrix:
         bucket: [toptal-brayan-perera-primary-cdn, toptal-brayan-perera-failover-cdn]
@@ -43,6 +45,8 @@ jobs:
             SERVICE_COUNT: 2
             CLUSTER: toptal-ecs
             TASK_DEF: toptal-api-td
+            STATUS_PATH: /api/status
+            LB_NAME: toptal-api-lb
           - module: web
             MODULE_DIR: web
             IMAGE_NAME: toptal-web
@@ -50,6 +54,8 @@ jobs:
             SERVICE_COUNT: 2
             CLUSTER: toptal-ecs
             TASK_DEF: toptal-web-td
+            STATUS_PATH: /
+            LB_NAME: toptal-web-lb
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -85,25 +91,54 @@ jobs:
 
       - name: Get task definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ matrix.TASK_DEF }} > ${{ matrix.TASK_DEF }}.json
+          aws ecs describe-task-definition --task-definition ${{ matrix.TASK_DEF }} | jq ".taskDefinition"> ${{ matrix.TASK_DEF }}.json
           pwd
           cat ${{ matrix.TASK_DEF }}.json
 
-#      - name: Fill in the new image ID in the Amazon Fargate task definition
-#        id: task-def
-#        uses: aws-actions/amazon-ecs-render-task-definition@v1
-#        env:
-#          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#          IMAGE_TAG: ${{ github.sha }}
-#        with:
-#          task-definition: ${{ matrix.TASK_DEF }}.json
-#          container-name: ${{ matrix.IMAGE_NAME }}
-#          image: $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
-#
-#      - name: Deploy Amazon ECS task definition
-#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-#        with:
-#          task-definition: ${{ steps.task-def.outputs.task-definition }}
-#          service: ${{ matrix.SERVICE_NAME }}
-#          cluster: ${{ matrix.CLUSTER }}
-#          wait-for-service-stability: true
+      - name: Fill in the new image ID in the Amazon Fargate task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        with:
+          task-definition: ${{ matrix.TASK_DEF }}.json
+          container-name: ${{ matrix.IMAGE_NAME }}
+          image: $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ matrix.SERVICE_NAME }}
+          cluster: ${{ matrix.CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Check Service status
+        id: status_check
+        run: |
+          lb_dns=$(aws elbv2  describe-load-balancers --names ${{ matrix.LB_NAME }} | jq ".LoadBalancers[0].DNSName" -r)
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" http://$lb_dns${{ matrix.STATUS_PATH }})
+          if [[ $status_code -eq 200 ]]; then
+            echo '::set-output name=SERVICE_STATUS::success'
+          else
+            echo '::set-output name=SERVICE_STATUS::failed'
+          fi
+
+      - name: Send Email Alert on failure
+        if: steps.status_check.outputs.SERVICE_STATUS == 'failed'
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          # user credentials
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          # email subject
+          subject: ${{ github.job }} job of ${{ github.repository }} Application status check failed
+          # email body as text
+          body: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }} and Service Status check failed.
+          # comma-separated string, send email to
+          to: $EMAIL_LIST
+          # from email name
+

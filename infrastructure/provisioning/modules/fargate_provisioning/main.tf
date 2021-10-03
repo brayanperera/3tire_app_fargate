@@ -26,12 +26,12 @@ locals {
 
   cdn_url_env = {
     name = "CDN_URL"
-    value = var.cdn_url
+    value = "https://${var.cdn_url}"
   }
 
   api_host_env = {
     name = "API_HOST"
-    value = local.api_lb.dns_name
+    value = "http://${local.api_lb.dns_name}"
   }
 }
 

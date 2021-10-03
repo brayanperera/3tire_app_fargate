@@ -14,19 +14,20 @@
 
 # Task List
 
-- [ ] Infrastructure provisioning 
+- [x] Infrastructure provisioning 
   - [X] ECR Provisioning 
   - [x] GitHub Token Provisioning
   - [x] VPC Provisioning
   - [x] DB Provisioning
   - [x] CDN Provisioning
   - [x] Loadbalancer provisioning 
-  - [ ] Fargate Provisioning
+  - [x] Fargate Provisioning
 - [x] Using CDN for static content in webapp
 - [ ] CI/CD Pipeline
   - [x] Push static files to CDN backend
   - [x] Image creation and push to ECR
   - [ ] Update Fargate service
+  - [ ] Test service status after deploy
 - [ ] Documentation
   - [ ] Project README.md
   - [ ] Architecture diagram 
