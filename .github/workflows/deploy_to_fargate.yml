@@ -108,7 +108,7 @@ jobs:
         with:
           task-definition: ${{ matrix.TASK_DEF }}.json
           container-name: ${{ matrix.IMAGE_NAME }}
-          image: $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
+          image: $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
