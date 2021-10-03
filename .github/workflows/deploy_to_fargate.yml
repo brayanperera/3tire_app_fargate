@@ -83,4 +83,6 @@ jobs:
 
       - name: Update Fargate service
         run: |
-          aws ecs update-service --cluster ${{ matrix.CLUSTER }} --service ${{ matrix.SERVICE_NAME }} --desired-count ${{ matrix.SERVICE_COUNT }}
+          aws ecs update-service --cluster ${{ matrix.CLUSTER }} \
+          --service ${{ matrix.SERVICE_NAME }} \
+          --desired-count ${{ matrix.SERVICE_COUNT }} --force-new-deployment

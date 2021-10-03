@@ -27,7 +27,7 @@ resource "aws_cloudwatch_log_group" "toptal_logs" {
 locals {
   db_host_env = {
     name = "DBHOST"
-    value = var.rds_db_endpoint
+    value = replace(var.rds_db_endpoint, ":5432", "")
   }
 
   cdn_url_env = {

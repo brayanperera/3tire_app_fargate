@@ -50,7 +50,7 @@ apps = [
       },
       {
         name = "DB"
-        value = "toptal_api_db"
+        value = "toptal_api"
       },
       {
         name = "DBUSER"
