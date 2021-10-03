@@ -20,6 +20,10 @@ variable "task_role_arn" {}
 
 variable "cdn_url" {}
 
+variable "app_lbs" {}
+
+variable "app_tgs" {}
+
 variable "fargate" {
   type = object({
     user_policies = list(string)

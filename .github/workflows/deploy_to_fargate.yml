@@ -42,12 +42,14 @@ jobs:
             SERVICE_NAME: toptal-api-service
             SERVICE_COUNT: 2
             CLUSTER: toptal-ecs
+            TASK_DEF: toptal-api-td
           - module: web
             MODULE_DIR: web
             IMAGE_NAME: toptal-web
             SERVICE_NAME: toptal-web-service
             SERVICE_COUNT: 2
             CLUSTER: toptal-ecs
+            TASK_DEF: toptal-web-td
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -81,8 +83,25 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_FARGATE_USER_SECRET_KEY }}
           aws-region: us-east-1
 
-      - name: Update Fargate service
+      - name: Get task definition
         run: |
-          aws ecs update-service --cluster ${{ matrix.CLUSTER }} \
-          --service ${{ matrix.SERVICE_NAME }} \
-          --desired-count ${{ matrix.SERVICE_COUNT }} --force-new-deployment
+          aws ecs describe-task-definition --task-definition ${{ matrix.TASK_DEF }} > ${{ matrix.TASK_DEF }}.json
+
+      - name: Fill in the new image ID in the Amazon Fargate task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        with:
+          task-definition: ${{ matrix.TASK_DEF }}.json
+          container-name: ${{ matrix.IMAGE_NAME }}
+          image: $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ matrix.SERVICE_NAME }}
+          cluster: ${{ matrix.CLUSTER }}
+          wait-for-service-stability: true

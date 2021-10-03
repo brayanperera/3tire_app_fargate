@@ -1,14 +1,8 @@
-/* Provision IAM User for GitHub Actions */
+/* Load data */
 
-
-/* Provision ALB */
-module "lb_provisioning" {
-  source = "../lb_provisioning"
-  common_config = var.common_config
-  app = var.app
-  vpc_id = var.vpc_id
-  default_sec_group_id = var.default_security_group
-  subnet_ids = var.lb_subnet_ids
+locals {
+  api_lb = var.app_lbs[index(var.app_lbs.*.name, "toptal-api-lb")]
+  app_tg = var.app_tgs[index(var.app_tgs.*.name, "${var.app.app_name}-tg")]
 }
 
 /* Cloudwatch logs */
@@ -34,6 +28,11 @@ locals {
     name = "CDN_URL"
     value = var.cdn_url
   }
+
+  api_host_env = {
+    name = "API_HOST"
+    value = local.api_lb.dns_name
+  }
 }
 
 module "container_def" {
@@ -51,7 +50,7 @@ module "container_def" {
   }]
   container_cpu = var.app.service_config.cpu
   working_directory = var.app.working_directory
-  environment  = concat(var.app.env_vars, var.app.app_name == "toptal-api" ? [local.db_host_env]: [], var.app.app_name == "toptal-web" ? [local.cdn_url_env]: [])
+  environment  = concat(var.app.env_vars, var.app.app_name == "toptal-api" ? [local.db_host_env]: [], var.app.app_name == "toptal-web" ? [local.cdn_url_env, local.api_host_env]: [])
   log_configuration = {
     logDriver = "awslogs"
     options = {
@@ -91,7 +90,7 @@ resource "aws_ecs_service" "app_service" {
   launch_type = "FARGATE"
 
   load_balancer {
-    target_group_arn = module.lb_provisioning.app_tg_arn
+    target_group_arn = local.app_tg.arn
     container_name   = var.app.app_name
     container_port   = var.app.port
   }

@@ -18,18 +18,39 @@ module "db_provisioning" {
   db_availability_zones = var.common_config.availability_zones
   rds = var.rds
   common_config = var.common_config
+  depends_on = [module.vpc_provisioning]
 }
 
 module "ecs_provisioning" {
   source = "./modules/ecs_provisioning"
   common_config = var.common_config
   fargate = var.fargate
+  depends_on = [module.vpc_provisioning, module.db_provisioning]
 }
 
 module "cdn_provisioning" {
   source = "./modules/cdn_provisioning"
   cdn    = var.cdn
   common_config = var.common_config
+  depends_on = [module.vpc_provisioning]
+}
+
+/* Provision ALB */
+module "lb_provisioning" {
+  source = "./modules/lb_provisioning"
+  count = length(var.apps)
+  common_config = var.common_config
+  app = var.apps[count.index]
+  vpc_id = module.vpc_provisioning.vpc_id
+  default_sec_group_id = module.vpc_provisioning.default_sec_group_id
+  subnet_ids = module.vpc_provisioning.vpc_public_subnet_ids
+  depends_on = [module.vpc_provisioning, module.ecr_provisioning]
+}
+
+locals {
+  app_lbs = module.lb_provisioning[*].app_lb
+  api_lb = module.lb_provisioning[index(module.lb_provisioning[*].app_lb.name, "toptal-api-lb")]
+  app_tgs = module.lb_provisioning[*].app_tg
 }
 
 module "fargate_provisioning" {
@@ -48,4 +69,8 @@ module "fargate_provisioning" {
   task_role_arn          = module.ecs_provisioning.task_role_arn
   vpc_id                 = module.vpc_provisioning.vpc_id
   cdn_url                = module.cdn_provisioning.cdn_url
+  app_lbs             = local.app_lbs
+  app_tgs              = local.app_tgs
+
+  depends_on = [module.vpc_provisioning, module.ecr_provisioning, module.lb_provisioning]
 }

@@ -114,10 +114,6 @@ apps = [
       {
         name = "PORT"
         value = 8081
-      },
-      {
-        name = "API_HOST"
-        value = ""
       }
     ]
     health_check = {

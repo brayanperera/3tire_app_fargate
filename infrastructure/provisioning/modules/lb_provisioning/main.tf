@@ -60,6 +60,8 @@ resource "aws_s3_bucket" "app_lb_log_bucket" {
 }
 POLICY
 
+  force_destroy = true
+
   tags = {
     Name = "${var.app.app_name}-lb-log-bucket"
     Environment = var.common_config.environment

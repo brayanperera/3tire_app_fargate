@@ -6,6 +6,8 @@ resource "aws_s3_bucket" "primary" {
   versioning {
     enabled = true
   }
+
+  force_destroy = true
   
   tags = {
     Name = "${var.cdn.s3_bucket_prefix}-${var.cdn.primary_origin}"
@@ -20,7 +22,9 @@ resource "aws_s3_bucket" "failover" {
   versioning {
     enabled = true
   }
-  
+
+  force_destroy = true
+
   tags = {
     Name = "${var.cdn.s3_bucket_prefix}-${var.cdn.failover_origin}"
     Environment = var.common_config.environment
@@ -30,6 +34,8 @@ resource "aws_s3_bucket" "failover" {
 resource "aws_s3_bucket" "cdn_logs" {
   bucket = "${var.cdn.s3_bucket_prefix}-${var.cdn.log_bucket}"
   acl    = "private"
+
+  force_destroy = true
 
   tags = {
     Name = "${var.cdn.s3_bucket_prefix}-${var.cdn.log_bucket}"
@@ -51,7 +57,7 @@ resource "aws_iam_user" "cdn_s3_user" {
 
 resource "aws_iam_user_policy" "cdn_s3_user_policy" {
   name = "cdn_user_power_policy"
-  user = var.cdn.cdn_user
+  user = aws_iam_user.cdn_s3_user.name
 
   policy = <<EOF
 {
