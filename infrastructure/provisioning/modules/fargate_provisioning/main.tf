@@ -88,12 +88,7 @@ resource "aws_ecs_service" "app_service" {
   cluster         = var.aws_ecs_cluster_arn
   task_definition = aws_ecs_task_definition.td.arn
   desired_count   = var.app.service_config.count
-  iam_role        = var.task_role_arn
-
-  ordered_placement_strategy {
-    type  = "binpack"
-    field = "cpu"
-  }
+  launch_type = "FARGATE"
 
   load_balancer {
     target_group_arn = module.lb_provisioning.app_tg_arn
@@ -101,13 +96,8 @@ resource "aws_ecs_service" "app_service" {
     container_port   = var.app.port
   }
 
-  placement_constraints {
-    type       = "memberOf"
-    expression = "attribute:ecs.availability-zone in ${var.common_config.availability_zones}"
-  }
-
   network_configuration {
-    security_groups  = var.default_security_group
+    security_groups  = [var.default_security_group]
     subnets          = var.app.assign_public_ip ? var.private_subnets_ids : var.private_subnets_ids
     assign_public_ip = var.app.assign_public_ip
   }

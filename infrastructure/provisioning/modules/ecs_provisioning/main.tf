@@ -32,7 +32,7 @@ resource "aws_iam_user" "fargate_user" {
 }
 
 resource "aws_iam_user_policy_attachment" "fargate_user_policy_attach" {
-  count = len(var.fargate.user_policies)
+  count = length(var.fargate.user_policies)
   user       = aws_iam_user.fargate_user.name
   policy_arn = "arn:aws:iam::aws:policy/${var.fargate.user_policies[count.index]}"
 }

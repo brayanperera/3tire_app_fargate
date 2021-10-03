@@ -110,7 +110,7 @@ resource "aws_alb_target_group" "app_tg" {
 resource "aws_lb_listener" "app" {
   
   load_balancer_arn = aws_lb.app_lb.arn
-  port              = var.app.port
+  port              = var.app.lb_port
   protocol          = "HTTP"
 
   default_action {
