@@ -41,11 +41,13 @@ jobs:
             IMAGE_NAME: toptal-api
             SERVICE_NAME: toptal-api-service
             SERVICE_COUNT: 2
+            CLUSTER: toptal-ecs
           - module: web
             MODULE_DIR: web
             IMAGE_NAME: toptal-web
             SERVICE_NAME: toptal-web-service
             SERVICE_COUNT: 2
+            CLUSTER: toptal-ecs
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -81,4 +83,4 @@ jobs:
 
       - name: Update Fargate service
         run: |
-          aws ecs update-service --service ${{ matrix.SERVICE_NAME }} --desired-count ${{ matrix.SERVICE_COUNT }}
+          aws ecs update-service --cluster ${{ matrix.CLUSTER }} --service ${{ matrix.SERVICE_NAME }} --desired-count ${{ matrix.SERVICE_COUNT }}
