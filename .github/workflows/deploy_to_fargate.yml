@@ -86,22 +86,24 @@ jobs:
       - name: Get task definition
         run: |
           aws ecs describe-task-definition --task-definition ${{ matrix.TASK_DEF }} > ${{ matrix.TASK_DEF }}.json
+          pwd
+          cat ${{ matrix.TASK_DEF }}.json
 
-      - name: Fill in the new image ID in the Amazon Fargate task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
-        with:
-          task-definition: ${{ matrix.TASK_DEF }}.json
-          container-name: ${{ matrix.IMAGE_NAME }}
-          image: $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
-
-      - name: Deploy Amazon ECS task definition
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ matrix.SERVICE_NAME }}
-          cluster: ${{ matrix.CLUSTER }}
-          wait-for-service-stability: true
+#      - name: Fill in the new image ID in the Amazon Fargate task definition
+#        id: task-def
+#        uses: aws-actions/amazon-ecs-render-task-definition@v1
+#        env:
+#          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#          IMAGE_TAG: ${{ github.sha }}
+#        with:
+#          task-definition: ${{ matrix.TASK_DEF }}.json
+#          container-name: ${{ matrix.IMAGE_NAME }}
+#          image: $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
+#
+#      - name: Deploy Amazon ECS task definition
+#        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+#        with:
+#          task-definition: ${{ steps.task-def.outputs.task-definition }}
+#          service: ${{ matrix.SERVICE_NAME }}
+#          cluster: ${{ matrix.CLUSTER }}
+#          wait-for-service-stability: true
