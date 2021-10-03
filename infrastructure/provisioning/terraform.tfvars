@@ -5,11 +5,13 @@ common_config = {
   availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
   environment = "prod"
   name_prefix = "toptal"
+  github_repo = "3tire_app_fargate"
+  github_repo_env = "prod"
 }
 
 ecr = {
   ecr_user = "ecr_user"
-  github_repo = "brayanperera/3tire_app_fargate"
+  github_repo = "3tire_app_fargate"
   github_repo_env = "prod"
 }
 
@@ -76,6 +78,7 @@ apps = [
       cpu = 256
       memory = 512
       count = 2
+      memory_reservation = 512
     }
     sec_group_rules = [
       {
@@ -90,6 +93,17 @@ apps = [
         description = "LB access to port 80"
       }
     ]
+    autoscaling = {
+      enable_autoscaling = true
+      max_cpu_threshold = 85
+      min_cpu_threshold = 10
+      max_cpu_evaluation_period = 3
+      min_cpu_evaluation_period = 3
+      max_cpu_period = 60
+      min_cpu_period = 60
+      scale_target_max_capacity = 5
+      scale_target_min_capacity = 2
+    }
   },
   {
     app_name = "toptal-web"
@@ -119,6 +133,7 @@ apps = [
       cpu = 256
       memory = 512
       count = 2
+      memory_reservation = 512
     }
     sec_group_rules = [
       {
@@ -133,15 +148,25 @@ apps = [
         description = "LB access to port 80"
       }
     ]
+    autoscaling = {
+      enable_autoscaling = true
+      max_cpu_threshold = 85
+      min_cpu_threshold = 10
+      max_cpu_evaluation_period = 3
+      min_cpu_evaluation_period = 3
+      max_cpu_period = 60
+      min_cpu_period = 60
+      scale_target_max_capacity = 5
+      scale_target_min_capacity = 2
+    }
   }
 ]
 
 fargate = {
-  iam_group = "fargate_execution"
   iam_user = "fargate_user"
-  group_policies = ["AmazonECS_FullAccess", "AmazonS3FullAccess"]
+  user_policies = ["AmazonECS_FullAccess", "AmazonS3FullAccess"]
   ecs_cluster = "toptal-ecs"
-  service_log_retention = 15
+  service_log_retention = 30
   privileged = false
   start_timeout = 60
   stop_timeout = 60
@@ -172,4 +197,6 @@ cdn = {
     cached_methods = ["GET", "HEAD"]
   }
   cdn_user = "toptal_cdn_user"
+  github_repo = "3tire_app_fargate"
+  github_repo_env = "prod"
 }

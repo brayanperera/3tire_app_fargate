@@ -5,13 +5,15 @@ variable "common_config" {
     failover_region = string
     availability_zones = list(string)
     environment = string
+    name_prefix = string
+    github_repo = string
+    github_repo_env = string
   })
 }
 
 variable "fargate" {
   type = object({
-    iam_group = string
-    group_policies = list(string)
+    user_policies = list(string)
     iam_user = string
     ecs_cluster = string
     service_log_retention = number

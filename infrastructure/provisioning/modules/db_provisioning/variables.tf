@@ -11,6 +11,8 @@ variable "common_config" {
     availability_zones = list(string)
     environment = string
     name_prefix = string
+    github_repo = string
+    github_repo_env = string
   })
 }
 

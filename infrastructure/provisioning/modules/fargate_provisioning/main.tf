@@ -1,3 +1,6 @@
+/* Provision IAM User for GitHub Actions */
+
+
 /* Provision ALB */
 module "lb_provisioning" {
   source = "../lb_provisioning"
@@ -33,20 +36,19 @@ locals {
   }
 }
 
-module "task_def" {
-  source  = "cn-terraform/ecs-fargate-task-definition/aws"
-  version = "1.0.23"
+module "container_def" {
+  source  = "cloudposse/ecs-container-definition/aws"
+  version = "0.53.0"
 
   container_image = "${var.common_config.aws_account_id}.dkr.ecr.${var.common_config.region}.amazonaws.com/${var.app.app_name}:latest"
   container_name  = var.app.app_name
-  name_prefix     = var.fargate.ecs_cluster
   container_memory = var.app.service_config.memory
   container_memory_reservation = var.app.service_config.memory_reservation
-  port_mappings = {
+  port_mappings = [{
     containerPort = var.app.port
     hostPort = var.app.port
     protocol = "tcp"
-  }
+  }]
   container_cpu = var.app.service_config.cpu
   working_directory = var.app.working_directory
   environment  = concat(var.app.env_vars, var.app.app_name == "toptal-api" ? [local.db_host_env]: [], var.app.app_name == "toptal-web" ? [local.cdn_url_env]: [])
@@ -63,10 +65,28 @@ module "task_def" {
   stop_timeout = var.fargate.stop_timeout
 }
 
+# Task Definition
+resource "aws_ecs_task_definition" "td" {
+  family                = "${var.app.app_name}-td"
+  container_definitions = "[${module.container_def.json_map_encoded}]"
+  task_role_arn         = var.task_role_arn
+  execution_role_arn    = var.task_role_arn
+  network_mode          = "awsvpc"
+  cpu                      = var.app.service_config.cpu
+  memory                   = var.app.service_config.memory
+  requires_compatibilities = ["FARGATE"]
+
+  tags = {
+    Environment = var.common_config.environment
+    Name = "${var.app.app_name}-td"
+  }
+}
+
+
 resource "aws_ecs_service" "app_service" {
   name            = "${var.app.app_name}-service"
   cluster         = var.aws_ecs_cluster_arn
-  task_definition = module.task_def.aws_ecs_task_definition_td_arn
+  task_definition = aws_ecs_task_definition.td.arn
   desired_count   = var.app.service_config.count
   iam_role        = var.task_role_arn
 

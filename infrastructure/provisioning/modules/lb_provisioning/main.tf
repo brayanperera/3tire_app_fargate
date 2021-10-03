@@ -71,13 +71,13 @@ resource "aws_lb" "app_lb" {
   name               = "${var.app.app_name}-lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [var.default_sec_group_id, aws_security_group.app_sg[count.index].id]
+  security_groups    = [var.default_sec_group_id, aws_security_group.app_sg.id]
   subnets            = var.subnet_ids
 
   enable_deletion_protection = false
 
   access_logs {
-    bucket  = aws_s3_bucket.app_lb_log_bucket[count.index].bucket
+    bucket  = aws_s3_bucket.app_lb_log_bucket.bucket
     prefix  = var.app.app_name
     enabled = true
   }
@@ -109,12 +109,12 @@ resource "aws_alb_target_group" "app_tg" {
 
 resource "aws_lb_listener" "app" {
   
-  load_balancer_arn = aws_lb.app_lb[count.index].arn
+  load_balancer_arn = aws_lb.app_lb.arn
   port              = var.app.port
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_alb_target_group.app_tg[count.index].arn
+    target_group_arn = aws_alb_target_group.app_tg.arn
   }
 }

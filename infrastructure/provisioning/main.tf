@@ -2,8 +2,6 @@ module "ecr_provisioning" {
   source = "./modules/ecr_provisioning"
   ecr_user = var.ecr.ecr_user
   apps = var.apps[*].app_name
-  github_repo = var.ecr.github_repo
-  github_repo_env = var.ecr.github_repo_env
   common_config = var.common_config
 }
 

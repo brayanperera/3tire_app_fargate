@@ -218,22 +218,22 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 /* Create GitHub secrets */
 
 resource "github_actions_environment_secret" "cdn_access_key" {
-  repository       = "3tire_app_fargate"
-  environment      = "prod"
+  repository       = var.common_config.github_repo
+  environment      = var.common_config.github_repo_env
   secret_name      = "AWS_CDN_USER_ACCESS_KEY"
   plaintext_value  = aws_iam_access_key.cdn_s3_user.id
 }
 
 resource "github_actions_environment_secret" "cdn_secret_key" {
-  repository       = "3tire_app_fargate"
-  environment      = "prod"
+  repository       = var.common_config.github_repo
+  environment      = var.common_config.github_repo_env
   secret_name      = "AWS_CDN_USER_SECRET_KEY"
   plaintext_value  = aws_iam_access_key.cdn_s3_user.secret
 }
 
 resource "github_actions_environment_secret" "cdn_url" {
-  repository       = "3tire_app_fargate"
-  environment      = "prod"
+  repository       = var.common_config.github_repo
+  environment      = var.common_config.github_repo_env
   secret_name      = "AWS_CDN_DOMAIN"
   plaintext_value  = aws_cloudfront_distribution.s3_distribution.domain_name
 }

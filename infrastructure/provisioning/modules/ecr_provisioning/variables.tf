@@ -7,10 +7,6 @@ variable "apps" {
   type = list(string)
 }
 
-variable "github_repo" {}
-
-variable "github_repo_env" {}
-
 variable "common_config" {
   type = object({
     aws_account_id = number
@@ -19,5 +15,7 @@ variable "common_config" {
     availability_zones = list(string)
     environment = string
     name_prefix = string
+    github_repo = string
+    github_repo_env = string
   })
 }
