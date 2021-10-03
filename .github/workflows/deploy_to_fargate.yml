@@ -39,11 +39,13 @@ jobs:
           - module: api
             MODULE_DIR: api
             IMAGE_NAME: toptal-api
-            SERVICE_NAME: toptal_api
+            SERVICE_NAME: toptal-api-service
+            SERVICE_COUNT: 2
           - module: web
             MODULE_DIR: web
             IMAGE_NAME: toptal-web
-            SERVICE_NAME: toptal_web
+            SERVICE_NAME: toptal-web-service
+            SERVICE_COUNT: 2
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -69,3 +71,14 @@ jobs:
           docker tag $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
           docker push $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:$IMAGE_TAG
           docker push $ECR_REGISTRY/${{ matrix.IMAGE_NAME }}:latest
+
+      - name: Configure AWS credentials for Fargate
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_FARGATE_USER_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_FARGATE_USER_SECRET_KEY }}
+          aws-region: us-east-1
+
+      - name: Update Fargate service
+        run: |
+          aws ecs update-service --service ${{ matrix.SERVICE_NAME }} --desired-count ${{ matrix.SERVICE_COUNT }}
