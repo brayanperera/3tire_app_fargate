@@ -50,19 +50,20 @@ module "lb_provisioning" {
 locals {
   app_lbs = module.lb_provisioning[*].app_lb
   app_tgs = module.lb_provisioning[*].app_tg
+  api_lb = module.lb_provisioning[index(module.lb_provisioning[*].app_lb.name, "toptal-api-lb")]
 }
 
-/* Provision internal ALB for api */
-module "api_lb_provisioning" {
-  source = "./modules/lb_provisioning"
-  common_config = var.common_config
-  app = var.apps[index(var.apps[*].app_name, "toptal-api")]
-  private_lb = true
-  vpc_id = module.vpc_provisioning.vpc_id
-  default_sec_group_id = module.vpc_provisioning.default_sec_group_id
-  subnet_ids = module.vpc_provisioning.vpc_private_subnet_ids
-  depends_on = [module.vpc_provisioning, module.ecr_provisioning]
-}
+#/* Provision internal ALB for api */
+#module "api_lb_provisioning" {
+#  source = "./modules/lb_provisioning"
+#  common_config = var.common_config
+#  app = var.apps[index(var.apps[*].app_name, "toptal-api")]
+#  private_lb = true
+#  vpc_id = module.vpc_provisioning.vpc_id
+#  default_sec_group_id = module.vpc_provisioning.default_sec_group_id
+#  subnet_ids = module.vpc_provisioning.vpc_private_subnet_ids
+#  depends_on = [module.vpc_provisioning, module.ecr_provisioning]
+#}
 
 module "fargate_provisioning" {
   source = "./modules/fargate_provisioning"
@@ -82,6 +83,6 @@ module "fargate_provisioning" {
   cdn_url                = module.cdn_provisioning.cdn_url
   app_lbs             = local.app_lbs
   app_tgs              = local.app_tgs
-  api_dns_name = module.api_lb_provisioning.app_lb_domain
+  api_dns_name = local.api_lb.app_lb_domain
   depends_on = [module.vpc_provisioning, module.ecr_provisioning, module.lb_provisioning]
 }
