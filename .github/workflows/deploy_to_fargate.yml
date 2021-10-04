@@ -144,5 +144,6 @@ jobs:
           # comma-separated string, send email to
           to: $EMAIL_LIST
           # from email name
+          from: ${{ secrets.EMAIL_USERNAME }}
 
 
