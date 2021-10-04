@@ -267,3 +267,17 @@ Configure GitHub Secrets;
 stop
 @enduml
 ````
+
+#### ECR Provisioning
+
+````plantuml
+@startuml
+start
+:Create IAM User `ecr_user`;
+:Create IAM User policy for `ecr_user`;
+:Create access key for `ecr_user`;
+:Create ECR repository;
+:Create GitHub secrets for Access Key and Secret;
+stop
+@enduml
+````

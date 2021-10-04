@@ -8,10 +8,6 @@ resource "aws_iam_user" "ecr_user" {
   }
 }
 
-resource "aws_iam_access_key" "ecr_user" {
-  user = aws_iam_user.ecr_user.name
-}
-
 resource "aws_iam_user_policy" "ecr_user_ro" {
   name = "ecr_user_power_policy"
   user = aws_iam_user.ecr_user.name
