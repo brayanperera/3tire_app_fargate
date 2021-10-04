@@ -34,6 +34,7 @@ resource "aws_db_instance" "toptal_db" {
   backup_retention_period = var.rds.backup_retention_period
   backup_window     = var.rds.backup_window
   maintenance_window = var.rds.maintenance_window
+  multi_az = true
 
   tags = {
     Name = var.rds.instance_name

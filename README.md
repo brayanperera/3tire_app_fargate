@@ -65,209 +65,186 @@ This project uses set of variables for infrastructure provisioning. Please see t
 - **`common_config`**: 
   - **Type:** ``object``
   - **Description:** Common config elements for all the submodules
-  - **Content**
-    - `aws_account_id`
-      - **Type:** ``number``
-      - **Description:** AWS Account ID
-    - ``region``:
-      - **Type:** ``string``
-      - **Description:** Default AWS Region
-    - ``availability_zones``
-      - **Type:** ``list(string)``
-      - **Description:** List of Availability Zones ["us-east-1a", "us-east-1b", "us-east-1c"]
-    - ``environment``
-      - **Type:** ``string``
-      - **Description:** Deployment environment name.
-
+  - **Content**:
+    ````
+    {
+      aws_account_id = number
+      region = string
+      failover_region = string
+      availability_zones = list(string)
+      environment = string
+      name_prefix = string
+      github_repo = string
+      github_repo_env = string
+    }
+    ````
+ 
+ 
 - **`ecr`**:
   - **Type:** ``object``
   - **Description:** ECR provisioning module related variables
-  - **Content**   
-    - `ecr_user`
-        - **Type:** ``string``
-        - **Description:** IAM user to be created and provisioned in GitHub for container push
-    - `github_repo`
-        - **Type:** ``string``
-        - **Description:** GitHub repository name. ``GITHUB_TOKEN``, `GITHUB_ORGANIZATION`, and `GITHUB_OWNER` environment variables must present.
-    - `github_repo_env`
-        - **Type:** ``string``
-        - **Description:** GitHub Actions environment
+  - **Content**:
+    ````
+    {
+      ecr_user = string
+    }
+    ````
+
+
 - **`vpc`**:
   - **Type:** ``object``
   - **Description:**  VPC provisioning configs
-  - **Content**   
-    - `vpc_name`
-        - **Type:** ``string``
-        - **Description:** VPC name to be created
-    - `vpc_cidr`
-        - **Type:** ``string``
-        - **Description:** VPC Network CIDR
-    - `public_subnets_cidr`
-        - **Type:** ``list(string)``
-        - **Description:** Public subnet CIDR list ["10.0.20.0/24"]
-    - `private_subnets_cidr`
-        - **Type:** ``list(string)``
-        - **Description:** Private subnet CIDR list ["10.0.10.0/24"]
+  - **Content**:
+    ````
+    {
+      vpc_name = string
+      vpc_cidr = string
+      public_subnets_cidr = list(string)
+      private_subnets_cidr = list(string)
+    }
+    ````
+
+
 - **`rds`**:
   - **Type:** ``object``
   - **Description:** RDS provisioning variables for Postgres database
-  - **Content**   
-    - `instance_name`
-        - **Type:** ``string``
-        - **Description:**  RDS DB name 
-    - `instance_class`
-        - **Type:** ``string``
-        - **Description:** DB server size
-    - `allocated_storage`
-        - **Type:** ``number``
-        - **Description:**   DB size
-    - `storage_type`
-        - **Type:** ``string``
-        - **Description:** Storage type
-    - `engine`
-        - **Type:** ``string`` 
-        - **Description:** DB type. "postgres"
-    - `engine_version`
-        - **Type:** ``string``
-        - **Description:** DB version
-    - `db_name`
-        - **Type:** ``string``
-        - **Description:** Database name
-    - `db_user`
-        - **Type:** ``string``
-        - **Description:**   DB user
-    - `db_pass`
-        - **Type:** ``string``
-        - **Description:**   DB pass
-    - `backup_retention_period`
-        - **Type:** ``string``
-        - **Description:**   Backup keeping time in days
-    - `backup_window`
-        - **Type:** ``string`` 
-        - **Description:**  Backup window. E.g: "01:00-03:00"
-    - `maintenance_window`
-        - **Type:** ``string``
-        - **Description:**   Maintainance window. E.g:"mon:04:00-mon:06:00"
+  - **Content**:
+    ````
+    {
+      instance_name = string
+      instance_class = string
+      allocated_storage = number
+      storage_type = string
+      engine = string
+      engine_version = string
+      db_name = string
+      db_user = string
+      db_pass = string
+      backup_retention_period = number
+      backup_window = string
+      maintenance_window = string
+    }
+    ````
+
+
 - **`apps`**:
   - **Type:** ````
   - **Description:** 
-  - **Content**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**  
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
+  - **Content**:
+    ````
+    {
+      app_name = string
+      port = number
+      lb_port = number
+      assign_public_ip = bool
+      env_vars = list(object({
+        name = string
+        value = string
+      }))
+      health_check = object({
+        path = string
+        interval = number
+        timeout = number
+        healthy_threshold = number
+        unhealthy_threshold = number
+      })
+      module_dir = string
+      working_directory = string
+      service_config = object({
+        cpu = number
+        memory = number
+        count = number
+        memory_reservation = number
+      })
+      sec_group_rules = list(object({
+        from_port   = number
+        to_port     = number
+        protocol    = string
+        cidr_blocks  = list(string)
+        ipv6_cidr_blocks = list(string)
+        prefix_list_ids = list(string)
+        security_groups = list(string)
+        self = bool
+        description = string
+      }))
+
+      autoscaling = object({enable_autoscaling = bool
+        max_cpu_threshold = number
+        min_cpu_threshold = number
+        max_cpu_evaluation_period = string
+        min_cpu_evaluation_period = string
+        max_cpu_period = number
+        min_cpu_period = string
+        scale_target_max_capacity = number
+        scale_target_min_capacity = number})
+    }
+    ````
+
+
 - **`fargate`**:
   - **Type:** ``object``
   - **Description:** Fargate provisioning configs
-  - **Content**   
-    - `iam_group`
-        - **Type:** ``string``
-        - **Description:** IAM group which 
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**  
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**  
-    - ``
-        - **Type:** ````
-        - **Description:**   
+  - **Content**:
+    ````
+    {
+      user_policies = list(string)
+      iam_user = string
+      ecs_cluster = string
+      service_log_retention = number
+      privileged = bool
+      start_timeout = number
+      stop_timeout  = number
+    }
+    ````
+
+     
 - **`cdn`**:
-  - **Type:** ````
+  - **Type:** ``object``
   - **Description:** 
-  - **Content**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
-    - ``
-        - **Type:** ````
-        - **Description:**   
+  - **Content**:
+    ````
+    {
+      name = string
+      s3_bucket_prefix = string
+      group_origin = string
+      primary_origin = string
+      failover_origin = string
+      failover_status_codes = list(number)
+      origin_access_identity_name = string
+      log_bucket = string
+      restriction = object({
+        restriction_type = string
+        locations = list(string)
+      })
+      ttl = object({
+        min_ttl = number
+        default_ttl = number
+        max_ttl = number
+      })
+      description = string
+      default_root_object = string
+      cache_behavior = object({
+        allowed_methods = list(string)
+        cached_methods = list(string)
+      })
+      cdn_user = string
+    }
+    ````
+    
 ## Execution Workflow
+
+### Terraform Setup
+
+This step creates S3 backend for Terraform TFState file management. 
+
+````plantuml
+@startuml
+start
+:Create S3 bucket for TFState file store;
+:Create DynamoDB database for TF state lock storing;
+stop
+@enduml
+````
+
 
 ### 
