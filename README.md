@@ -20,6 +20,17 @@ Terraform and maintain the CI/CD via GitHub Actions workflows.
 > **Note:** This project is using GitHub repository to manage the CI/CD pipelines. 
 > Therefore code to be pushed to a GitHub repository
 
+## Architecture
+
+### Application High-Level Architecture 
+![application_architecture](docs/diagrams/application_architecture.png)
+
+### IaC and CI/CD Architecture 
+![iac_cicd_architecture](docs/diagrams/iac_cicd_architecture.png)
+
+### Deployment Architecture 
+![deployment_architecture](docs/diagrams/deployment_architecture.png)
+
 ## Initial Setup
 
 1. Using AWS CLI or Console, Create IAM User and Group, and provide necessary access to that user for resource creation. 
@@ -331,7 +342,7 @@ start
 :Attached supplied policies to the user;
 :Create Access key for the user;
 :Create ECS Cluster;
-:Create GitHub secrets for Access key and secret of fargate user. 
+:Create GitHub secrets for Access key and secret of fargate user;
 
 stop
 @enduml
@@ -342,8 +353,8 @@ stop
 ````plantuml
 @startuml
 start
-:Create Create S3 buckets for Primary and Failover origins ;
-:Create a bucket for CDN Access logs;
+: Create Create S3 buckets for Primary and Failover origins ;
+: Create a bucket for CDN Access logs;
 : Create IAM user and attach pilicies to access the buckets;
 : Create bucket policies;
 : Create access key for the CDN user;
@@ -354,3 +365,68 @@ start
 stop
 @enduml
 ````
+
+#### ALB Provisioning
+
+````plantuml
+@startuml
+start
+: Create AWS Security Group for the ALB;
+: Create S3 bucket for ALB log writing;
+: Create Application loadbalancer;
+: Create a target group for the application service;
+: Create ALB listner pointing to the target group ;
+stop
+@enduml
+````
+
+
+#### Fargate provisioning
+
+````plantuml
+@startuml
+start
+: Create AWS Cloudwatch log group;
+: Generate Container Definition;
+: Create task definition; 
+: Create ECS/Fargate Service;
+: Create Cloudwatch metric alarm, Scalling policy and Scaling target for each service;
+stop
+@enduml
+````
+
+### GitHub Action Flow
+
+This is invoked when master branch get a git push. 
+
+#### Upload CDN Content
+```plantuml
+@startuml
+start
+: Checkout Repository ;
+: Upload `web/public` content to Primary and Secondary S3 buckets;
+stop
+@enduml
+```
+
+#### Image creation, push and Fargate Task update
+```plantuml
+@startuml
+start
+: Checkout Repository ;
+: Configure AWS Credentials for ECR. 
+Use AWS_ECR_USER_ACCESS_KEY and 
+AWS_ECR_USER_SECRET_KEY secrets;
+: Login to ECR;
+: Build, tag and push images to ECR;
+: Configure AWS Credentials for Fargate. 
+Use AWS_FARGATE_USER_ACCESS_KEY and 
+AWS_FARGATE_USER_SECRET_KEY secrets;
+: Get ECS Task definitian;
+: Add new Image to the task definition ;
+: Deploy New Task Definition version;
+: Check service Status;
+: Send an Email if service check failed;
+stop
+@enduml
+```
