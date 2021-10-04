@@ -247,4 +247,23 @@ stop
 ````
 
 
-### 
+### Infrastructure Provisioning
+
+This step is deploying and configure the AWS and GitHub environment for the application deployment. 
+
+````plantuml
+@startuml
+start
+:Create ECR Resources and Provision GitHub secrets;
+:Create VPC, Subnets, NAT and Internet GWs,
+ and Security Groups;
+:Create RDS Postgres Multi-AZ deployment;
+:Create ECS Cluster and IAM resources ;
+:Create S3 Origins and Cloudfront distribition for CDN. 
+Configure GitHub Secrets;
+:Create loadbalancers for API and Web services;
+:Create IAM resources, Fargate service and Autoscalling. 
+Configure GitHub Secrets;
+stop
+@enduml
+````
