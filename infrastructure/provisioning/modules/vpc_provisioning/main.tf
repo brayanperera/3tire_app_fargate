@@ -9,35 +9,6 @@ resource "aws_vpc" "vpc" {
   }
 }
 
-/*==== Subnets ======*/
-/* Internet gateway for the public subnet */
-resource "aws_internet_gateway" "int_gw" {
-  vpc_id = aws_vpc.vpc.id
-  tags = {
-    Name        = "${var.common_config.environment}-igw"
-    Environment = var.common_config.environment
-  }
-}
-
-/* Elastic IP for NAT GW */
-resource "aws_eip" "nat_eip" {
-  count = length(var.vpc.private_subnets_cidr)
-  vpc        = true
-  depends_on = [aws_internet_gateway.int_gw]
-}
-
-/* NAT GW */
-resource "aws_nat_gateway" "nat_gw" {
-  count = length(var.vpc.private_subnets_cidr)
-  allocation_id = aws_eip.nat_eip[count.index].id
-  subnet_id     = aws_subnet.public_subnet[count.index].id
-  depends_on    = [aws_internet_gateway.int_gw]
-  tags = {
-    Name        = "nat-${count.index}"
-    Environment = var.common_config.environment
-  }
-}
-
 /* Public subnet */
 resource "aws_subnet" "public_subnet" {
   vpc_id                  = aws_vpc.vpc.id
@@ -64,22 +35,51 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
+/* Internet gateway for the public subnet */
+resource "aws_internet_gateway" "int_gw" {
+  vpc_id = aws_vpc.vpc.id
+  tags = {
+    Name        = "${var.common_config.environment}-igw"
+    Environment = var.common_config.environment
+  }
+}
+
+
+/* Elastic IP for NAT GW */
+resource "aws_eip" "nat_eip" {
+  count = length(var.vpc.private_subnets_cidr)
+  vpc        = true
+  depends_on = [aws_internet_gateway.int_gw]
+}
+
+/* NAT GW */
+resource "aws_nat_gateway" "nat_gw" {
+  count = length(var.vpc.private_subnets_cidr)
+  allocation_id = aws_eip.nat_eip[count.index].id
+  subnet_id     = aws_subnet.public_subnet[count.index].id
+  depends_on    = [aws_internet_gateway.int_gw]
+  tags = {
+    Name        = "nat-${count.index}"
+    Environment = var.common_config.environment
+  }
+}
+
 /*==== Route Tables ======*/
+/* Routing table for public subnet */
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.vpc.id
+  tags = {
+    Name        = "${var.common_config.environment}-public-route-table"
+    Environment = var.common_config.environment
+  }
+}
+
 /* Routing table for private subnet */
 resource "aws_route_table" "private" {
   count = length(var.vpc.private_subnets_cidr)
   vpc_id = aws_vpc.vpc.id
   tags = {
     Name        = "${var.common_config.environment}-rt-${aws_subnet.private_subnet[count.index].id}"
-    Environment = var.common_config.environment
-  }
-}
-
-/* Routing table for public subnet */
-resource "aws_route_table" "public" {
-  vpc_id = aws_vpc.vpc.id
-  tags = {
-    Name        = "${var.common_config.environment}-public-route-table"
     Environment = var.common_config.environment
   }
 }

@@ -281,3 +281,76 @@ start
 stop
 @enduml
 ````
+
+#### VPC Provisioning
+
+````plantuml
+@startuml
+start
+:Create VPC;
+:Create Public Subnets;
+:Create Private Subnets;
+:Create Internet GW;
+:Create Elastic IPs for NatGWs;
+:Create NatGW per private subnet;
+:Create public route table;
+:Create Route table per private subnet;
+:Create route for public route table;
+:Create route for private route tables;
+:Create route table association for public subnets;
+:Create route table association for private subnets;
+:Create AWS log group for flow logs;
+:Create IAM role and policy for vpc logs;
+:Create VPC Flow logs;
+stop
+@enduml
+````
+
+
+#### RDS Provisioning
+
+````plantuml
+@startuml
+start
+:Create DB Subnet group;
+:Create DB parameter group;
+:Create Postgres RDS DB instance with Multi-AZ;
+stop
+@enduml
+````
+
+
+#### ECS Provisioning
+
+````plantuml
+@startuml
+start
+:Create ecsTaskExecutionRole ;
+:Attach AmazonECSTaskExecutionRolePolicy to ecsTaskExecutionRole;
+:Create `fargate_user` IAM user;
+:Attached supplied policies to the user;
+:Create Access key for the user;
+:Create ECS Cluster;
+:Create GitHub secrets for Access key and secret of fargate user. 
+
+stop
+@enduml
+````
+
+#### CDN Provisioning
+
+````plantuml
+@startuml
+start
+:Create Create S3 buckets for Primary and Failover origins ;
+:Create a bucket for CDN Access logs;
+: Create IAM user and attach pilicies to access the buckets;
+: Create bucket policies;
+: Create access key for the CDN user;
+: Create Cloudfront Origin access identity;
+: Create Cloudfront Distribution;
+: Create GitHub Access key and Secret;
+: Configure CDN domain name as secret in GitHub;
+stop
+@enduml
+````
