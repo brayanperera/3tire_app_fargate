@@ -1,6 +1,10 @@
 variable "vpc_id" {}
 variable "default_sec_group_id" {}
 variable "subnet_ids" {}
+variable "private_lb" {
+  type = bool
+  default = false
+}
 
 variable "common_config" {
   type = object({

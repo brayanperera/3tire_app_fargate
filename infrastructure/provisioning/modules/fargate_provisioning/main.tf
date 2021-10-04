@@ -1,7 +1,6 @@
 /* Load data */
 
 locals {
-  api_lb = var.app_lbs[index(var.app_lbs.*.name, "toptal-api-lb")]
   app_tg = var.app_tgs[index(var.app_tgs.*.name, "${var.app.app_name}-tg")]
 }
 
@@ -31,7 +30,7 @@ locals {
 
   api_host_env = {
     name = "API_HOST"
-    value = "http://${local.api_lb.dns_name}"
+    value = "http://${var.api_dns_name}"
   }
 }
 

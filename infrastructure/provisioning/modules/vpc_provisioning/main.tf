@@ -21,17 +21,19 @@ resource "aws_internet_gateway" "int_gw" {
 
 /* Elastic IP for NAT GW */
 resource "aws_eip" "nat_eip" {
+  count = length(var.vpc.private_subnets_cidr)
   vpc        = true
   depends_on = [aws_internet_gateway.int_gw]
 }
 
 /* NAT GW */
 resource "aws_nat_gateway" "nat_gw" {
-  allocation_id = aws_eip.nat_eip.id
-  subnet_id     = element(aws_subnet.public_subnet.*.id, 0)
+  count = length(var.vpc.private_subnets_cidr)
+  allocation_id = aws_eip.nat_eip[count.index].id
+  subnet_id     = aws_subnet.public_subnet[count.index].id
   depends_on    = [aws_internet_gateway.int_gw]
   tags = {
-    Name        = "nat"
+    Name        = "nat-${count.index}"
     Environment = var.common_config.environment
   }
 }
@@ -65,9 +67,10 @@ resource "aws_subnet" "private_subnet" {
 /*==== Route Tables ======*/
 /* Routing table for private subnet */
 resource "aws_route_table" "private" {
+  count = length(var.vpc.private_subnets_cidr)
   vpc_id = aws_vpc.vpc.id
   tags = {
-    Name        = "${var.common_config.environment}-private-route-table"
+    Name        = "${var.common_config.environment}-rt-${aws_subnet.private_subnet[count.index].id}"
     Environment = var.common_config.environment
   }
 }
@@ -88,9 +91,10 @@ resource "aws_route" "public_internet_gateway" {
 }
 
 resource "aws_route" "private_nat_gateway" {
-  route_table_id         = aws_route_table.private.id
+  count = length(var.vpc.private_subnets_cidr)
+  route_table_id         = aws_route_table.private[count.index].id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat_gw.id
+  nat_gateway_id         = aws_nat_gateway.nat_gw[count.index].id
 }
 
 /* Route table associations */
@@ -102,7 +106,7 @@ resource "aws_route_table_association" "public" {
 resource "aws_route_table_association" "private" {
   count          = length(var.vpc.private_subnets_cidr)
   subnet_id      = element(aws_subnet.private_subnet.*.id, count.index)
-  route_table_id = aws_route_table.private.id
+  route_table_id = aws_route_table.private[count.index].id
 }
 
 /* Flow logs */

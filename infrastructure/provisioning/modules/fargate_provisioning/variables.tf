@@ -2,6 +2,8 @@ variable "vpc_id" {}
 
 variable "lb_subnet_ids" {}
 
+variable "api_dns_name" {}
+
 variable "public_subnets_ids" {
   type = list(string)
 }

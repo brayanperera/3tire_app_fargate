@@ -1,8 +1,13 @@
-/* Security Groups for Application LBs */
+/* set locals */
 
+locals {
+  app_name = var.private_lb ? "${var.app.app_name}-private": var.app.app_name
+}
+
+/* Security Groups for Application LBs */
 resource "aws_security_group" "app_sg" {
   
-  name        = var.app.app_name
+  name        = local.app_name
   description = "Security group to allow inbound to ${var.app.app_name} LB"
   vpc_id      = var.vpc_id
 
@@ -21,7 +26,7 @@ data "aws_elb_service_account" "main" {}
 
 resource "aws_s3_bucket" "app_lb_log_bucket" {
   
-  bucket = "${var.common_config.aws_account_id}-${var.app.app_name}-log-bucket"
+  bucket = "${var.common_config.aws_account_id}-${local.app_name}-log-bucket"
   acl    = "log-delivery-write"
   policy = <<POLICY
 {
@@ -33,7 +38,7 @@ resource "aws_s3_bucket" "app_lb_log_bucket" {
         "AWS": "arn:aws:iam::${data.aws_elb_service_account.main.id}:root"
       },
       "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${var.app.app_name}-log-bucket/${var.app.app_name}/AWSLogs/${var.common_config.aws_account_id}/*"
+      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${local.app_name}-log-bucket/${local.app_name}/AWSLogs/${var.common_config.aws_account_id}/*"
     },
     {
       "Effect": "Allow",
@@ -41,7 +46,7 @@ resource "aws_s3_bucket" "app_lb_log_bucket" {
         "Service": "delivery.logs.amazonaws.com"
       },
       "Action": "s3:PutObject",
-      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${var.app.app_name}-log-bucket/${var.app.app_name}/AWSLogs/${var.common_config.aws_account_id}/*",
+      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${local.app_name}-log-bucket/${local.app_name}/AWSLogs/${var.common_config.aws_account_id}/*",
       "Condition": {
         "StringEquals": {
           "s3:x-amz-acl": "bucket-owner-full-control"
@@ -54,7 +59,7 @@ resource "aws_s3_bucket" "app_lb_log_bucket" {
         "Service": "delivery.logs.amazonaws.com"
       },
       "Action": "s3:GetBucketAcl",
-      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${var.app.app_name}-log-bucket"
+      "Resource": "arn:aws:s3:::${var.common_config.aws_account_id}-${local.app_name}-log-bucket"
     }
   ]
 }
@@ -63,15 +68,15 @@ POLICY
   force_destroy = true
 
   tags = {
-    Name = "${var.app.app_name}-lb-log-bucket"
+    Name = "${var.common_config.aws_account_id}-${local.app_name}-log-bucket"
     Environment = var.common_config.environment
   }
 }
 
 resource "aws_lb" "app_lb" {
   
-  name               = "${var.app.app_name}-lb"
-  internal           = false
+  name               = "${local.app_name}-lb"
+  internal           = var.private_lb
   load_balancer_type = "application"
   security_groups    = [var.default_sec_group_id, aws_security_group.app_sg.id]
   subnets            = var.subnet_ids
@@ -80,19 +85,19 @@ resource "aws_lb" "app_lb" {
 
   access_logs {
     bucket  = aws_s3_bucket.app_lb_log_bucket.bucket
-    prefix  = var.app.app_name
+    prefix  = local.app_name
     enabled = true
   }
 
   tags = {
-    Name = "${var.app.app_name}-lb"
+    Name = "${local.app_name}-lb"
     Environment = var.common_config.environment
   }
 }
 
 resource "aws_alb_target_group" "app_tg" {
   
-  name = "${var.app.app_name}-tg"
+  name = "${local.app_name}-tg"
   port     = var.app.port
   protocol = "HTTP"
   vpc_id   = var.vpc_id
